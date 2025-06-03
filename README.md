@@ -18,6 +18,7 @@ API Request → Routes → Services → Models → Response
 
 
 # Estructura de Archivos
+```
 API_task/
 ├── app/
 │   ├── main.py              # Punto de entrada
@@ -32,6 +33,7 @@ API_task/
 │       └── task_service.py  # Lógica de negocio
 ├── requirements.txt         # Dependencias
 └── README.md
+```
 
 
 # Componentes Principales
@@ -39,8 +41,8 @@ API_task/
 1. Models (app/models/task.py)
 - Propósito: Representan las entidades de negocio.
 pythonclass Task:
-    # Propiedades: id, title, description, completed, created_at
-    # Métodos: mark_complete(), to_dict()
+    Propiedades: id, title, description, completed, created_at
+    Métodos: mark_complete(), to_dict()
 - Responsabilidad: Definir la estructura y comportamiento de una tarea.
 
 2. Schemas (app/schemas/task.py)
@@ -53,8 +55,8 @@ TaskUpdate    # ← Datos para actualizar
 3. Services (app/services/task_service.py)
 - Propósito: Lógica de negocio centralizada.
 pythonclass TaskService:
-    # create_task(), get_all_tasks(), get_task_by_id()
-    # update_task(), delete_task()
+    create_task(), get_all_tasks(), get_task_by_id()
+    update_task(), delete_task()
 - Responsabilidad: Implementar las reglas de negocio. Actualmente usa memoria, fácil migrar a DB.
 
 4. Routes (app/routes/tasks.py)
