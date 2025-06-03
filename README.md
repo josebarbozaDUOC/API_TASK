@@ -103,13 +103,13 @@ Error Handling
 ## Configuración y Ejecución
 ```
 Instalación:
-bashpip install -r requirements.txt
+pip install -r requirements.txt
 Desarrollo:
-bashpython -m app.main
+python -m app.main
 o
 uvicorn app.main:app --reload
-URLs importantes:
 
+URLs importantes:
 API: http://localhost:8000
 Documentación: http://localhost:8000/docs
 Health Check: http://localhost:8000/api/v1/health
@@ -122,7 +122,7 @@ Via Documentación (Recomendado):
 - Probar endpoints interactivamente
 
 Via cURL:
-bash# Crear tarea
+# Crear tarea
 curl -X POST http://localhost:8000/api/v1/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Nueva tarea"}'
