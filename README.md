@@ -5,7 +5,13 @@ Arquitectura modular con separación clara de responsabilidades.
 Por ahora usa almacenamiento en memoria, preparada para migrar a base de datos.
 ```
 
-# Arquitectura del Sistema
+## Stack Tecnológico
+- **FastAPI**     - Framework web async
+- **Pydantic**    - Validación de datos
+- **Python 3.8+** - Lenguaje base
+- **Uvicorn**     - Servidor ASGI
+
+## Arquitectura del Sistema
 ```
 API Request → Routes → Services → Models → Response
      ↓           ↓         ↓         ↓
@@ -13,7 +19,7 @@ API Request → Routes → Services → Models → Response
   (Schemas)             Negocio
 ```
 
-# Flujo de una petición típica:
+## Flujo de una petición típica:
 - Cliente envía POST /api/v1/tasks con JSON
 - FastAPI valida el JSON contra TaskCreate schema
 - Router (tasks.py) recibe la petición válida
@@ -22,7 +28,7 @@ API Request → Routes → Services → Models → Response
 - Respuesta se serializa usando TaskResponse schema
 
 
-# Estructura de Archivos
+## Estructura de Archivos
 ```
 API_task/
 ├── app/
@@ -41,44 +47,44 @@ API_task/
 ```
 
 
-# Componentes Principales
-```
-1. Models (app/models/task.py)
+## Componentes Principales
+
+### 1. Models (app/models/task.py)
 - Propósito: Representan las entidades de negocio.
-class Task:
-    Propiedades: id, title, description, completed, created_at
-    Métodos: mark_complete(), to_dict()
+- class Task:
+- - Propiedades: id, title, description, completed, created_at
+- - Métodos: mark_complete(), to_dict()
 - Responsabilidad: Definir la estructura y comportamiento de una tarea.
 
-2. Schemas (app/schemas/task.py)
+### 2. Schemas (app/schemas/task.py)
 - Propósito: Validación y serialización de datos.
-TaskCreate    # ← Datos que llegan (input)
-TaskResponse  # → Datos que salen (output)  
-TaskUpdate    # ← Datos para actualizar
+- TaskCreate    `# ← Datos que llegan (input)`
+- TaskResponse  `# → Datos que salen (output)`  
+- TaskUpdate    `# ← Datos para actualizar`
 - Responsabilidad: Garantizar que los datos sean correctos antes de procesarlos.
 
-3. Services (app/services/task_service.py)
+### 3. Services (app/services/task_service.py)
 - Propósito: Lógica de negocio centralizada.
-class TaskService:
-    create_task(), get_all_tasks(), get_task_by_id()
-    update_task(), delete_task()
+- class TaskService:
+- - create_task(), get_all_tasks(), get_task_by_id()
+- - update_task(), delete_task()
 - Responsabilidad: Implementar las reglas de negocio. Actualmente usa memoria, fácil migrar a DB.
 
-4. Routes (app/routes/tasks.py)
+### 4. Routes (app/routes/tasks.py)
 - Propósito: Definir endpoints HTTP.
-GET    /api/v1/tasks      # Listar todas
-POST   /api/v1/tasks      # Crear nueva
-GET    /api/v1/tasks/{id} # Obtener por ID
-PUT    /api/v1/tasks/{id} # Actualizar
-DELETE /api/v1/tasks/{id} # Eliminar
+- GET    /api/v1/tasks      `# Listar todas`
+- POST   /api/v1/tasks      `# Crear nueva`
+- GET    /api/v1/tasks/{id} `# Obtener por ID`
+- PUT    /api/v1/tasks/{id} `# Actualizar`
+- DELETE /api/v1/tasks/{id} `# Eliminar`
 - Responsabilidad: Manejar peticiones HTTP y delegar al service.
 
-5. Main (app/main.py)
+### 5. Main (app/main.py)
 - Propósito: Configuración y arranque de la aplicación.
 - Responsabilidad: Crear la app FastAPI, registrar routers, configurar middleware.
-```
 
-# Flujos de Datos
+
+## Flujos de Datos
 
 Crear Tarea (POST /api/v1/tasks)
 1. Cliente envía: {"title": "Comprar pan"}
@@ -94,7 +100,7 @@ Error Handling
 - Errores internos → HTTP 500 (FastAPI automático)
 
 
-# Configuración y Ejecución
+## Configuración y Ejecución
 ```
 Instalación:
 bashpip install -r requirements.txt
@@ -109,7 +115,7 @@ Documentación: http://localhost:8000/docs
 Health Check: http://localhost:8000/api/v1/health
 ```
 
-# Testing Manual
+## Testing Manual
 ```
 Via Documentación (Recomendado):
 - Ir a http://localhost:8000/docs
@@ -126,7 +132,7 @@ curl http://localhost:8000/api/v1/tasks
 ```
 
 
-# Decisiones de Diseño
+## Decisiones de Diseño
 
 ¿Por qué FastAPI vs Flask/Django?**
 - Validación automática con Pydantic
@@ -140,7 +146,7 @@ curl http://localhost:8000/api/v1/tasks
 - Fácil migración posterior (demostrada en TaskService)
 
 
-# Próximos Pasos
+## Próximos Pasos
 
 Fase 2 - Persistencia:
 - Migrar TaskService de memoria a SQLAlchemy
@@ -154,7 +160,7 @@ Fase 3 - Robustez:
 - Docker containerization
 
 
-# Para Desarrolladores
+## Guía para Desarrolladores
 
 Agregar nuevo endpoint:
 - Definir schema en schemas/
@@ -176,9 +182,8 @@ Debugging:
 - FastAPI devuelve stack traces en desarrollo
 
 
-# Principio clave: 
-```
-Cada archivo tiene una responsabilidad clara. 
-Si necesitas cambiar "cómo se validan los datos", ve a schemas/. 
-Si necesitas cambiar "cómo se almacenan", ve a services/.
-```
+## Principio clave: 
+**Cada archivo tiene una responsabilidad clara.**
+- ¿Cambiar validaciones? → `schemas/`
+- ¿Cambiar storage? → `services/`
+- ¿Cambiar endpoints? → `routes/`
