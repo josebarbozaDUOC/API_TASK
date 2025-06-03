@@ -1,0 +1,31 @@
+HOW TO USE
+
+#-----------------------------BUILD
+# Actualizar PIP
+python.exe -m pip install --upgrade pip
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+#-----------------------------RUN
+# Ejecutar (desde ROOT)
+python -m app.main
+
+# O con uvicorn directamente
+uvicorn app.main:app --reload
+
+#-----------------------------TEST
+# Desde el navegador
+http://localhost:8000/api/v1/health
+http://localhost:8000/docs
+
+
+
+# Ver desde powershell
+curl http://localhost:8000/api/v1/tasks
+
+# Crear tarea desde powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/tasks" -Method POST -ContentType "application/json" -Body '{"title": "Hola", "description": "Mundo"}'
+
+# Crear tarea desde CMD
+curl -X POST http://localhost:8000/api/v1/tasks -H "Content-Type: application/json" -d "{\"title\": \"Chao\", \"description\": \"Mundo\"}"
