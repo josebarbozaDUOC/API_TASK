@@ -1,12 +1,17 @@
 # API_TASK
-API REST para gestión de tareas construida con FastAPI. Arquitectura modular con separación clara de responsabilidades. Por ahora usa almacenamiento en memoria, preparada para migrar a base de datos.
+```
+API REST para gestión de tareas construida con FastAPI.
+Arquitectura modular con separación clara de responsabilidades.
+Por ahora usa almacenamiento en memoria, preparada para migrar a base de datos.
+```
 
 # Arquitectura del Sistema
+```
 API Request → Routes → Services → Models → Response
      ↓           ↓         ↓         ↓
   Validación  Endpoints  Lógica   Entidades
   (Schemas)             Negocio
-
+```
 
 # Flujo de una petición típica:
 - Cliente envía POST /api/v1/tasks con JSON
@@ -37,31 +42,31 @@ API_task/
 
 
 # Componentes Principales
-
+```
 1. Models (app/models/task.py)
 - Propósito: Representan las entidades de negocio.
-pythonclass Task:
+class Task:
     Propiedades: id, title, description, completed, created_at
     Métodos: mark_complete(), to_dict()
 - Responsabilidad: Definir la estructura y comportamiento de una tarea.
 
 2. Schemas (app/schemas/task.py)
 - Propósito: Validación y serialización de datos.
-pythonTaskCreate    # ← Datos que llegan (input)
+TaskCreate    # ← Datos que llegan (input)
 TaskResponse  # → Datos que salen (output)  
 TaskUpdate    # ← Datos para actualizar
 - Responsabilidad: Garantizar que los datos sean correctos antes de procesarlos.
 
 3. Services (app/services/task_service.py)
 - Propósito: Lógica de negocio centralizada.
-pythonclass TaskService:
+class TaskService:
     create_task(), get_all_tasks(), get_task_by_id()
     update_task(), delete_task()
 - Responsabilidad: Implementar las reglas de negocio. Actualmente usa memoria, fácil migrar a DB.
 
 4. Routes (app/routes/tasks.py)
 - Propósito: Definir endpoints HTTP.
-pythonGET    /api/v1/tasks      # Listar todas
+GET    /api/v1/tasks      # Listar todas
 POST   /api/v1/tasks      # Crear nueva
 GET    /api/v1/tasks/{id} # Obtener por ID
 PUT    /api/v1/tasks/{id} # Actualizar
@@ -71,7 +76,7 @@ DELETE /api/v1/tasks/{id} # Eliminar
 5. Main (app/main.py)
 - Propósito: Configuración y arranque de la aplicación.
 - Responsabilidad: Crear la app FastAPI, registrar routers, configurar middleware.
-
+```
 
 # Flujos de Datos
 
@@ -90,22 +95,22 @@ Error Handling
 
 
 # Configuración y Ejecución
-
+```
 Instalación:
 bashpip install -r requirements.txt
 Desarrollo:
 bashpython -m app.main
-# o
+o
 uvicorn app.main:app --reload
 URLs importantes:
 
 API: http://localhost:8000
 Documentación: http://localhost:8000/docs
 Health Check: http://localhost:8000/api/v1/health
-
+```
 
 # Testing Manual
-
+```
 Via Documentación (Recomendado):
 - Ir a http://localhost:8000/docs
 - Probar endpoints interactivamente
@@ -116,9 +121,9 @@ curl -X POST http://localhost:8000/api/v1/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Nueva tarea"}'
 
-# Listar tareas  
+Listar tareas  
 curl http://localhost:8000/api/v1/tasks
-
+```
 
 
 # Decisiones de Diseño
@@ -172,7 +177,8 @@ Debugging:
 
 
 # Principio clave: 
-
+```
 Cada archivo tiene una responsabilidad clara. 
 Si necesitas cambiar "cómo se validan los datos", ve a schemas/. 
 Si necesitas cambiar "cómo se almacenan", ve a services/.
+```
