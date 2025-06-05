@@ -1,4 +1,6 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
-sqlalchemy=2.0.35
+sqlalchemy==2.0.35
+pytest==8.4.0
+pytest-cov==6.1.1
