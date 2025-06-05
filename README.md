@@ -1,8 +1,8 @@
-# API_TASK
+# API_TASK — Gestión de tareas con FastAPI
 ```
-API REST para gestión de tareas construida con FastAPI.
-Arquitectura modular con separación clara de responsabilidades.
-Por ahora usa almacenamiento en memoria, preparada para migrar a base de datos.
+API REST para la gestión de tareas, construida con FastAPI.  
+Diseño modular con separación clara de responsabilidades.  
+Actualmente usa almacenamiento en memoria, con arquitectura preparada para migrar fácilmente a una base de datos.
 ```
 
 ## Stack Tecnológico
@@ -32,22 +32,34 @@ API Request → Routes → Services → Models → Response
 ```
 API_task/
 ├── app/
-│   ├── main.py              # Punto de entrada
+│   ├── main.py                   # Punto de entrada
+│   ├── config.py                 # Configuración
 │   ├── models/
-│   │   └── task.py          # Entidades de dominio
+│   │   └── task.py               # Entidades de dominio
 │   ├── schemas/
-│   │   └── task.py          # Validación entrada/salida
+│   │   └── task.py               # Validación entrada/salida
+│   ├── repositories/
+│   │   ├── __init__.py
+│   │   ├── base_repository.py    # Interface TaskRepository
+│   │   ├── memory_repository.py  # MemoryTaskRepository
+│   │   └── sqlite_repository.py  # SqliteTaskRepository
 │   ├── routes/
-│   │   ├── health.py        # Health check
-│   │   └── tasks.py         # Endpoints de tareas
+│   │   ├── health.py             # Health check
+│   │   └── tasks.py              # Endpoints de tareas
 │   └── services/
-│       └── task_service.py  # Lógica de negocio
-├── requirements.txt         # Dependencias
+│       └── task_service.py       # Lógica de negocio
+├── test/
+├── storage/
+├── requirements.txt              # Dependencias
 └── README.md
 ```
 
 
 ## Componentes Principales
+
+### 0. Config (app/config.py)
+- Propósito: Inicializar dependencias (repositorio) según entorno/configuración.
+- Responsabilidad: Inyectar una instancia de TaskRepository en el TaskService.
 
 ### 1. Models (app/models/task.py)
 - Propósito: Representan las entidades de negocio.
@@ -63,14 +75,21 @@ API_task/
 - TaskUpdate    `# ← Datos para actualizar`
 - Responsabilidad: Garantizar que los datos sean correctos antes de procesarlos.
 
-### 3. Services (app/services/task_service.py)
+### 3. Repositories (app/repositories/...)
+- Propósito: Abstraer el acceso a datos detrás de una interfaz común.
+- - base_repository.py: `Interfaz que define contrato implementado por los demás repositorios.`
+- - memory_repository.py: `Implementa TaskRepository en memoria (una lista). Útil para desarrollo rápido y testing sin persistencia real.`
+- - sqlite_repository.py: `En desarrollo. Implementará TaskRepository usando SQLAlchemy + SQLite. Permitirá persistencia local sin depender de servidores externos.`
+- Responsabilidad: Proveer operaciones CRUD sin exponer detalles del almacenamiento (memoria, SQLite, etc).
+
+### 4. Services (app/services/task_service.py)
 - Propósito: Lógica de negocio centralizada.
 - class TaskService:
 - - create_task(), get_all_tasks(), get_task_by_id()
 - - update_task(), delete_task()
-- Responsabilidad: Implementar las reglas de negocio. Actualmente usa memoria, fácil migrar a DB.
+- Responsabilidad: Implementar las reglas de negocio.
 
-### 4. Routes (app/routes/tasks.py)
+### 5. Routes (app/routes/tasks.py)
 - Propósito: Definir endpoints HTTP.
 - GET    /api/v1/tasks      `# Listar todas`
 - POST   /api/v1/tasks      `# Crear nueva`
@@ -79,7 +98,7 @@ API_task/
 - DELETE /api/v1/tasks/{id} `# Eliminar`
 - Responsabilidad: Manejar peticiones HTTP y delegar al service.
 
-### 5. Main (app/main.py)
+### 6. Main (app/main.py)
 - Propósito: Configuración y arranque de la aplicación.
 - Responsabilidad: Crear la app FastAPI, registrar routers, configurar middleware.
 
@@ -134,16 +153,30 @@ curl http://localhost:8000/api/v1/tasks
 
 ## Decisiones de Diseño
 
-¿Por qué FastAPI vs Flask/Django?**
+**¿Por qué FastAPI vs Flask/Django?**
 - Validación automática con Pydantic
 - Documentación auto-generada
 - Type hints nativo
 - Performance superior
 
-¿Por qué memoria primero vs DB directo?**
+**¿Por qué memoria primero vs DB directo?**
 - Iteración rápida en desarrollo
 - Simplicidad para testing
 - Fácil migración posterior (demostrada en TaskService)
+
+**¿Cómo desacoplar task_service.py para cumplir con SOLID?**
+- Opción 1: Trabajar directamente con listas de tareas
+- - Simple, pero acopla la lógica al almacenamiento
+- - No escalable si cambiamos el backend (DB, API externa)
+- Opción 2: Crear un wrapper para listas (adapter)
+- - Encapsula un poco más
+- - Sigue siendo específico para listas, no es una solución general
+- Opción 3: Abstraer el repositorio e inyectarlo en el servicio
+- - Desacople total entre lógica y almacenamiento
+- - Permite cambiar fácilmente de almacenamiento (memoria → SQLite)
+- - Favorece testeo y extensibilidad
+- **Decisión tomada**: esta opción sigue el principio de inversión de dependencias (D de SOLID) y permite que `TaskService` dependa de una **interfaz genérica**, no de una implementación concreta.
+
 
 
 ## Próximos Pasos
@@ -172,6 +205,10 @@ Modificar lógica de negocio:
 - Todo en services/task_service.py
 - Los endpoints solo delegan, no contienen lógica
 
+Modificar storage (repositorios):
+- Agregar nuevos en repositories/
+- Definir repositorio a usar en config.py
+
 Cambiar validaciones:
 - Modificar schemas en schemas/task.py
 - Pydantic se encarga del resto
@@ -185,5 +222,6 @@ Debugging:
 ## Principio clave: 
 **Cada archivo tiene una responsabilidad clara.**
 - ¿Cambiar validaciones? → `schemas/`
-- ¿Cambiar storage? → `services/`
 - ¿Cambiar endpoints? → `routes/`
+- ¿Agregar storage? → `repositories/`
+- ¿Cambiar storage? → `config.py`

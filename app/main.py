@@ -17,7 +17,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Solo agregar si necesitas frontend web
+# Preparado para frontend web
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:8000"],

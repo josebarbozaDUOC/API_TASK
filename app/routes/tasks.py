@@ -11,12 +11,13 @@ Este módulo define las rutas de la API REST para operaciones CRUD:
 - DELETE /tasks/{id}: Eliminar tarea
 
 Todas las rutas incluyen validación automática y manejo de errores.
+Utiliza el servicio definido en config.py
 """
 
 from fastapi import APIRouter, HTTPException
 from typing import List
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
-from app.services.task_service import task_service
+from app.config import task_service
 
 router = APIRouter()
 
