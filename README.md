@@ -10,6 +10,7 @@ Actualmente usa almacenamiento en memoria, con arquitectura preparada para migra
 - **Pydantic**    - Validación de datos
 - **Python 3.8+** - Lenguaje base
 - **Uvicorn**     - Servidor ASGI
+- **SQLite**      - Base de datos (próximamente)
 
 ## Arquitectura del Sistema
 ```
@@ -49,7 +50,7 @@ API_task/
 │   └── services/
 │       └── task_service.py       # Lógica de negocio
 ├── test/
-├── storage/
+├── storage/                      # Archivos DB locales
 ├── requirements.txt              # Dependencias
 └── README.md
 ```

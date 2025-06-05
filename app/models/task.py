@@ -1,15 +1,15 @@
 # app/models/task.py
 
 """
-Entidad de dominio Task.
+Entidad de dominio: Task
 
-Este módulo define la clase Task que representa una tarea en el sistema.
-Contiene la lógica de negocio y las propiedades fundamentales de una tarea.
+Este módulo define la clase Task, que representa una tarea dentro del sistema.
+Encapsula los atributos fundamentales y comportamientos básicos relacionados con el ciclo de vida de una tarea.
 
 Responsabilidades:
-- Definir la estructura de datos de una tarea
-- Implementar comportamientos básicos (marcar como completada)
-- Proporcionar serialización a diccionario
+- Representar la estructura de datos de una tarea
+- Implementar comportamientos relacionados (completar/incompletar)
+- Facilitar la serialización a formatos como JSON
 """
 
 from datetime import datetime
@@ -17,16 +17,20 @@ from typing import Optional
 
 class Task:
     """
-    Clase que representa una tarea en nuestro sistema.
-    Es como el "molde" para crear tareas individuales.
+    Clase que representa una tarea en el sistema.
+    Define los atributos y métodos asociados a una tarea individual.
     """
-    def __init__(self, id: int, title: str, description: Optional[str] = None):
-        # Propiedades básicas de cada tarea
-        self.id             = id                # Identificador único
-        self.title          = title             # Título de la tarea
-        self.description    = description       # Descripción opcional
-        self.completed      = False             # Por defecto, no está completada
-        self.created_at     = datetime.now()    # Timestamp de cuándo se creó
+    def __init__(self, 
+                 title: str, 
+                 description: Optional[str] = None,
+                 id: Optional[int] = None, 
+                 completed: bool = False,
+                 created_at: Optional[datetime] = None):
+        self.id             = id                            # Identificador único
+        self.title          = title                         # Título de la tarea
+        self.description    = description                   # Descripción opcional
+        self.completed      = completed                     # Estado de finalización
+        self.created_at     = created_at or datetime.now()  # Fecha y hora de creación
     
     def mark_complete(self):
         """Marca la tarea como completada"""

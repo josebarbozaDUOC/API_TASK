@@ -11,8 +11,6 @@ Classes:
     TaskService: Maneja todas las operaciones de negocio de tareas
 """
 
-# REFACTORIZAR ESTE MÓDULO: Tratar los IF del Update 
-
 from typing import List, Optional
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
@@ -29,7 +27,6 @@ class TaskService:
     def create_task(self, task_data: TaskCreate) -> Task:
         """Crea una nueva tarea"""
         task = Task(
-            id=0, # Se inicia en cero, pero toma el valor ID del repositorio
             title=task_data.title,
             description=task_data.description
         )
@@ -49,13 +46,11 @@ class TaskService:
         if not existing_task:
             return None
         
-        # Actualiza solo los campos proporcionados (HACER REFACTOR MÁS ADELANTE)
-        if task_data.title is not None:
-            existing_task.title = task_data.title
-        if task_data.description is not None:
-            existing_task.description = task_data.description
-        if task_data.completed is not None:
-            existing_task.completed = task_data.completed
+        # Convierte el objeto Pydantic a diccionario, excluyendo campos no enviados
+        # Luego itera sobre los campos y los asigna dinámicamente
+        update_fields = task_data.model_dump(exclude_unset=True)
+        for field, value in update_fields.items():
+            setattr(existing_task, field, value)
         
         return self.repository.update(task_id, existing_task)
     
