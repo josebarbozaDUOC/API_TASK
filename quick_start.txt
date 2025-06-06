@@ -7,6 +7,9 @@ python.exe -m pip install --upgrade pip
 # Instalar dependencias
 pip install -r requirements.txt
 
+# Prepara entorno con db
+python scripts/init_db.py
+
 #-----------------------------RUN
 # Ejecutar (desde ROOT)
 python -m app.main

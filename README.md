@@ -33,25 +33,40 @@ API Request → Routes → Services → Models → Response
 ```
 API_task/
 ├── app/
-│   ├── main.py                   # Punto de entrada
-│   ├── config.py                 # Configuración
+│   ├── main.py                       # Punto de entrada
+│   ├── config.py                     # Configuración
 │   ├── models/
-│   │   └── task.py               # Entidades de dominio
-│   ├── schemas/
-│   │   └── task.py               # Validación entrada/salida
+│   │   └── task.py                   # Entidades de dominio
 │   ├── repositories/
 │   │   ├── __init__.py
-│   │   ├── base_repository.py    # Interface TaskRepository
-│   │   ├── memory_repository.py  # MemoryTaskRepository
-│   │   └── sqlite_repository.py  # SqliteTaskRepository
+│   │   ├── base_repository.py        # Interface TaskRepository
+│   │   ├── memory_repository.py      # MemoryTaskRepository
+│   │   └── sqlite_repository.py      # SqliteTaskRepository
 │   ├── routes/
-│   │   ├── health.py             # Health check
-│   │   └── tasks.py              # Endpoints de tareas
+│   │   ├── health.py                 # Health check
+│   │   └── tasks.py                  # Endpoints de tareas
+│   ├── schemas/
+│   │   └── task.py                   # Validación entrada/salida
+│   ├── scripts/
+│   │   └── init_db.py                # Prepara entorno con db
 │   └── services/
-│       └── task_service.py       # Lógica de negocio
+│       └── task_service.py           # Lógica de negocio
 ├── test/
-├── storage/                      # Archivos DB locales
-├── requirements.txt              # Dependencias
+│   ├── integration/                  # Test de Endpoints
+│   │   ├── test_health_endpoints.py
+│   │   └── test_task_endpoints.py 
+│   ├── repositories/                 # Test de Repositorios
+│   │   ├── test_memory_repository.py
+│   │   └── test_sqlite_repository.py
+│   ├── conftest.py                   # Configuraciones de test
+│   ├── test_models.py                # Test de model Task
+│   ├── test_schemas.py               # Test de esquema Pydantic
+│   └── test_services.py              # Test de task_service
+├── storage/                          # Archivos DB locales
+│   └── tasks.db
+├── coverage.svg                      # % Cobertura de los test
+├── quick_start.txt                   # Guia rápida
+├── requirements.txt                  # Dependencias
 └── README.md
 ```
 
@@ -121,35 +136,42 @@ Error Handling
 
 
 ## Configuración y Ejecución
-```
+
 Instalación:
-pip install -r requirements.txt
+```pip install -r requirements.txt```
+
+Prepara entorno con db:
+```python scripts/init_db.py```
+
 Desarrollo:
-python -m app.main
+```python -m app.main```
 o
-uvicorn app.main:app --reload
+```uvicorn app.main:app --reload```
 
 URLs importantes:
-API: http://localhost:8000
-Documentación: http://localhost:8000/docs
-Health Check: http://localhost:8000/api/v1/health
-```
+API: ```http://localhost:8000```
+Documentación: ```http://localhost:8000/docs```
+Health Check: ```http://localhost:8000/api/v1/health```
+
+
+## Test
+
+![coverage](coverage.svg)
+
 
 ## Testing Manual
-```
+
 Via Documentación (Recomendado):
-- Ir a http://localhost:8000/docs
+- Ir a ```http://localhost:8000/docs```
 - Probar endpoints interactivamente
 
-Via cURL:
-# Crear tarea
-curl -X POST http://localhost:8000/api/v1/tasks \
+Via cURL (Crear tarea):
+```curl -X POST http://localhost:8000/api/v1/tasks \
   -H "Content-Type: application/json" \
-  -d '{"title": "Nueva tarea"}'
+  -d '{"title": "Nueva tarea"}'```
 
-Listar tareas  
-curl http://localhost:8000/api/v1/tasks
-```
+Via cURL (Listar tareas)
+```curl http://localhost:8000/api/v1/tasks```
 
 
 ## Decisiones de Diseño

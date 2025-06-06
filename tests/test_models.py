@@ -21,8 +21,8 @@ Tests implementados:
 - test_multiple_instances_are_independent: Aislamiento entre instancias
 
 Ejecución:
-    python -m pytest tests/ -v
-    python -m pytest --cov=app tests/
+    python -m pytest tests/test_models.py -v
+    python -m pytest tests/test_models.py --cov=app.models.task -v
 """
 
 import pytest
@@ -30,7 +30,7 @@ from datetime import datetime, timedelta
 from app.models.task import Task
 
 
-class TestTask:
+class TestTaskModel:
     """Pruebas unitarias para el modelo Task."""
     
     # Tests de creación
