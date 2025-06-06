@@ -166,9 +166,7 @@ Via Documentación (Recomendado):
 - Probar endpoints interactivamente
 
 Via cURL (Crear tarea):
-```curl -X POST http://localhost:8000/api/v1/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Nueva tarea"}'```
+```curl -X POST http://localhost:8000/api/v1/tasks \ -H "Content-Type: application/json" \ -d '{"title": "Nueva tarea"}'```
 
 Via cURL (Listar tareas)
 ```curl http://localhost:8000/api/v1/tasks```
