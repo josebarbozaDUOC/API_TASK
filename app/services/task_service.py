@@ -14,46 +14,55 @@ Classes:
 from typing import List, Optional
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
-from app.repositories.base_repository import TaskRepository
+from app.repositories.task.base_repository import TaskRepository
+from loguru import logger
+
+ENTITY = "task" # Define qué tipo de entidad maneja este servicio
 
 class TaskService:
-    """
-    Servicio que maneja la lógica de negocio de las tareas.
-    """
+    """Servicio que maneja la lógica de negocio de las tareas."""
     
     def __init__(self, repository: TaskRepository):
-        self.repository = repository  # Inyección de dependencia
+        self.repository = repository
+        self.entity = ENTITY
     
     def create_task(self, task_data: TaskCreate) -> Task:
         """Crea una nueva tarea"""
-        task = Task(
-            title=task_data.title,
-            description=task_data.description
-        )
-        return self.repository.create(task)
+        task = Task(title=task_data.title, description=task_data.description)
+        created_task = self.repository.create(task)
+        
+        logger.bind(action="create", entity=self.entity, id=created_task.id).info("Entidad creada")
+        return created_task
     
     def get_all_tasks(self) -> List[Task]:
         """Obtiene todas las tareas"""
-        return self.repository.get_all()
+        tasks = self.repository.get_all()
+        logger.bind(action="get_all", entity=self.entity, count=len(tasks)).info("Entidades obtenidas")
+        return tasks
     
     def get_task_by_id(self, task_id: int) -> Optional[Task]:
         """Busca una tarea por ID"""
-        return self.repository.get_by_id(task_id)
+        task = self.repository.get_by_id(task_id)
+        logger.bind(action="get_by_id", entity=self.entity, id=task_id, found=task is not None).info("Entidad consultada")
+        return task
     
     def update_task(self, task_id: int, task_data: TaskUpdate) -> Optional[Task]:
         """Actualiza una tarea existente"""
         existing_task = self.repository.get_by_id(task_id)
         if not existing_task:
+            logger.bind(action="update", entity=self.entity, id=task_id, found=False).warning("Entidad no encontrada")
             return None
         
-        # Convierte el objeto Pydantic a diccionario, excluyendo campos no enviados
-        # Luego itera sobre los campos y los asigna dinámicamente
         update_fields = task_data.model_dump(exclude_unset=True)
         for field, value in update_fields.items():
             setattr(existing_task, field, value)
         
-        return self.repository.update(task_id, existing_task)
+        updated_task = self.repository.update(task_id, existing_task)
+        logger.bind(action="update", entity=self.entity, id=task_id, fields=list(update_fields.keys())).info("Entidad actualizada")
+        return updated_task
     
     def delete_task(self, task_id: int) -> bool:
         """Elimina una tarea"""
-        return self.repository.delete(task_id)
+        success = self.repository.delete(task_id)
+        logger.bind(action="delete", entity=self.entity, id=task_id, success=success).info("Entidad procesada")
+        return success

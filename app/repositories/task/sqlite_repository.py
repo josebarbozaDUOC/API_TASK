@@ -1,17 +1,33 @@
-# app/repositories/sqlite_repository.py
+# app/repositories/task/sqlite_repository.py
+
+"""
+Repositorio SQLite solo para Task
+
+Ejecuta consultas a DB de forma propia
+"""
+
+"""
+*Refactor posible:
+- Crear un archivo db_connection con el crud genérico sqlite, 
+usando pandas como intermediario.
+- O usar alguna ORM como SQLAlchemy, o SQLModel.
+
+- Falta agregar logger para errores
+"""
 
 import sqlite3
 from typing import List, Optional
 from datetime import datetime
 from app.models.task import Task
-from app.repositories.base_repository import TaskRepository
+from app.repositories.task.base_repository import TaskRepository
+from app.paths import PATH_REPO_SQLITE
 
 class SqliteTaskRepository(TaskRepository):
     """
     Implementación que guarda las tareas en SQLite.
     """
     
-    def __init__(self, db_path: str = "storage/tasks.db"):
+    def __init__(self, db_path: str = PATH_REPO_SQLITE):
         self.db_path = db_path
         self._init_db()
     

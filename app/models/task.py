@@ -21,9 +21,9 @@ class Task:
     Define los atributos y métodos asociados a una tarea individual.
     """
     def __init__(self, 
-                 title: str, 
+                 title: str,
                  description: Optional[str] = None,
-                 id: Optional[int] = None, 
+                 id: Optional[int] = None,
                  completed: bool = False,
                  created_at: Optional[datetime] = None):
         self.id             = id                            # Identificador único

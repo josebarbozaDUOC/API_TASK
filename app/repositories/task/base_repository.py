@@ -1,4 +1,8 @@
-# app/repositories/base_repository.py
+# app/repositories/task/base_repository.py
+
+"""
+Repositorio base solo para Task
+"""
 
 from abc import ABC, abstractmethod
 from typing import List, Optional

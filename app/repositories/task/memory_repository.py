@@ -1,20 +1,20 @@
-# app/repositories/memory_repository.py
+# app/repositories/task/memory_repository.py
+
+"""
+Repositorio memoria ram solo para Task (almacena en lista)
+
+Características:
+- Asigna IDs automáticamente de forma incremental
+- Almacena copias de los objetos para mantener independencia
+- Retorna copias para evitar modificaciones externas accidentales
+"""
 
 from typing import List, Optional
 from datetime import datetime
 from app.models.task import Task
-from app.repositories.base_repository import TaskRepository
+from app.repositories.task.base_repository import TaskRepository
 
 class MemoryTaskRepository(TaskRepository):
-    """
-    Implementación que guarda las tareas en memoria (lista).
-    
-    Características:
-    - Asigna IDs automáticamente de forma incremental
-    - Almacena copias de los objetos para mantener independencia
-    - Retorna copias para evitar modificaciones externas accidentales
-    """
-    
     def __init__(self):
         self._tasks: List[Task] = []
         self._next_id = 1

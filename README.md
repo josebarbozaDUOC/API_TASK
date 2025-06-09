@@ -2,15 +2,25 @@
 ```
 API REST para la gestión de tareas, construida con FastAPI.  
 Diseño modular con separación clara de responsabilidades.  
-Actualmente usa almacenamiento en memoria, con arquitectura preparada para migrar fácilmente a una base de datos.
+Usa SQLite por defecto, con arquitectura modular que permite cambiar fácilmente entre diferentes tipos de almacenamiento.
 ```
 
 ## Stack Tecnológico
+- **Python 3.8+** - Lenguaje base
 - **FastAPI**     - Framework web async
 - **Pydantic**    - Validación de datos
-- **Python 3.8+** - Lenguaje base
 - **Uvicorn**     - Servidor ASGI
-- **SQLite**      - Base de datos (próximamente)
+- **SQLite**      - Base de datos
+- **Loguru**      - Logging
+
+## Estado del Proyecto
+**Actualmente**: Sprint 2 completándose
+- CRUD completo con SQLite `LISTO`
+- Suite de testing implementada `LISTO`
+- Sistema de logging estructurado `EN CURSO`
+- Manejo de errores pendiente `PENDIENTE`
+**Siguiente**: Migración a SQLAlchemy y soporte multi-database
+
 
 ## Arquitectura del Sistema
 ```
@@ -33,24 +43,30 @@ API Request → Routes → Services → Models → Response
 ```
 API_task/
 ├── app/
+│   ├── __init__.py                   # Inicializaciones 
 │   ├── main.py                       # Punto de entrada
 │   ├── config.py                     # Configuración
+│   ├── logging/
+│   │   └── logging_system.py         # Configura loguru
 │   ├── models/
 │   │   └── task.py                   # Entidades de dominio
 │   ├── repositories/
-│   │   ├── __init__.py
-│   │   ├── base_repository.py        # Interface TaskRepository
-│   │   ├── memory_repository.py      # MemoryTaskRepository
-│   │   └── sqlite_repository.py      # SqliteTaskRepository
+│   │   ├── task/
+│   │   │   ├── base_repository.py    # Interface TaskRepository
+│   │   │   ├── memory_repository.py  # MemoryTaskRepository
+│   │   │   └── sqlite_repository.py  # SqliteTaskRepository
 │   ├── routes/
 │   │   ├── health.py                 # Health check
 │   │   └── tasks.py                  # Endpoints de tareas
 │   ├── schemas/
 │   │   └── task.py                   # Validación entrada/salida
-│   ├── scripts/
-│   │   └── init_db.py                # Prepara entorno con db
 │   └── services/
 │       └── task_service.py           # Lógica de negocio
+├── scripts/
+│   └── init_db.py                    # Prepara entorno con db
+├── storage/                          # Archivos DB locales
+│   ├── logs.db
+│   └── tasks.db
 ├── test/
 │   ├── integration/                  # Test de Endpoints
 │   │   ├── test_health_endpoints.py
@@ -62,8 +78,6 @@ API_task/
 │   ├── test_models.py                # Test de model Task
 │   ├── test_schemas.py               # Test de esquema Pydantic
 │   └── test_services.py              # Test de task_service
-├── storage/                          # Archivos DB locales
-│   └── tasks.db
 ├── coverage.svg                      # % Cobertura de los test
 ├── quick_start.txt                   # Guia rápida
 ├── requirements.txt                  # Dependencias
@@ -95,7 +109,7 @@ API_task/
 - Propósito: Abstraer el acceso a datos detrás de una interfaz común.
 - - base_repository.py: `Interfaz que define contrato implementado por los demás repositorios.`
 - - memory_repository.py: `Implementa TaskRepository en memoria (una lista). Útil para desarrollo rápido y testing sin persistencia real.`
-- - sqlite_repository.py: `En desarrollo. Implementará TaskRepository usando SQLAlchemy + SQLite. Permitirá persistencia local sin depender de servidores externos.`
+- - sqlite_repository.py: `Implementa TaskRepository usando SQLite nativo. Provee persistencia local sin dependencias externas.`
 - Responsabilidad: Proveer operaciones CRUD sin exponer detalles del almacenamiento (memoria, SQLite, etc).
 
 ### 4. Services (app/services/task_service.py)
@@ -186,6 +200,7 @@ Via cURL (Listar tareas)
 - Fácil migración posterior (demostrada en TaskService)
 
 **¿Cómo desacoplar task_service.py para cumplir con SOLID?**
+- Problema inicial: TaskService manejaba directamente una lista en memoria (self.tasks: List[Task] = []), violando el principio de responsabilidad única - mezclaba lógica de negocio con almacenamiento. Cambiar de memoria a DB requería reescribir todo el servicio.
 - Opción 1: Trabajar directamente con listas de tareas
 - - Simple, pero acopla la lógica al almacenamiento
 - - No escalable si cambiamos el backend (DB, API externa)
@@ -196,22 +211,14 @@ Via cURL (Listar tareas)
 - - Desacople total entre lógica y almacenamiento
 - - Permite cambiar fácilmente de almacenamiento (memoria → SQLite)
 - - Favorece testeo y extensibilidad
-- **Decisión tomada**: esta opción sigue el principio de inversión de dependencias (D de SOLID) y permite que `TaskService` dependa de una **interfaz genérica**, no de una implementación concreta.
+- **Decisión tomada**: esta opción sigue el principio de inversión de dependencias (D de SOLID) y permite que `TaskService` dependa de una **interfaz genérica**, no de una implementación concreta. Ahora TaskService recibe el repositorio por inyección de dependencias en lugar de crear su propia lista.
 
-
-
-## Próximos Pasos
-
-Fase 2 - Persistencia:
-- Migrar TaskService de memoria a SQLAlchemy
-- Agregar base de datos PostgreSQL/SQLite
-- Connection pooling
-
-Fase 3 - Robustez:
-- Testing automatizado
-- Logging estructurado
-- Rate limiting
-- Docker containerization
+**¿Por qué Loguru vs logging estándar/custom?**
+- Menor tiempo de desarrollo vs implementación propia
+- Sintaxis simple sin configuración verbose
+- Comunidad activa y mantenimiento garantizado
+- Logs estructurados en SQLite para auditoría
+- Serialización automática de excepciones
 
 
 ## Guía para Desarrolladores
@@ -228,7 +235,7 @@ Modificar lógica de negocio:
 
 Modificar storage (repositorios):
 - Agregar nuevos en repositories/
-- Definir repositorio a usar en config.py
+- Cambiar ACTIVE_REPOSITORY en config.py (MEMORY/SQLITE)
 
 Cambiar validaciones:
 - Modificar schemas en schemas/task.py

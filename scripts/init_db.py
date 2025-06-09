@@ -15,7 +15,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.repositories.sqlite_repository import SqliteTaskRepository
+from app.repositories.task.sqlite_repository import SqliteTaskRepository
 from app.models.task import Task
 
 def init_database():

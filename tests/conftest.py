@@ -20,7 +20,7 @@ HTML (entrar desde ruta file:///D:/PROYECTOS/API_TASK/htmlcov/function_index.htm
 """
 
 import pytest
-from app.repositories.memory_repository import MemoryTaskRepository
+from app.repositories.task.memory_repository import MemoryTaskRepository
 from app.services.task_service import TaskService
 
 @pytest.fixture

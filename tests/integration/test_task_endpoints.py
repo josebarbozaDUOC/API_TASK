@@ -26,7 +26,7 @@ import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime
 from app.main import app
-from app.repositories.memory_repository import MemoryTaskRepository
+from app.repositories.task.memory_repository import MemoryTaskRepository
 from app.services.task_service import TaskService
 from app.routes import tasks  # Importar el módulo para modificar task_service
 

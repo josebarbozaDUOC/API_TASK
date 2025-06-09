@@ -44,7 +44,7 @@ from datetime import datetime
 from app.services.task_service import TaskService
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
-from app.repositories.base_repository import TaskRepository
+from app.repositories.task.base_repository import TaskRepository
 
 
 class TestTaskService:

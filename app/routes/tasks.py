@@ -18,6 +18,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
 from app.config import task_service
+from loguru import logger
 
 router = APIRouter()
 
@@ -38,6 +39,7 @@ async def get_task(task_id: int):
     """Obtiene una tarea por ID"""
     task = task_service.get_task_by_id(task_id)
     if not task:
+        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
         raise HTTPException(status_code=404, detail="Task not found")
     return task.to_dict()
 
@@ -46,6 +48,7 @@ async def update_task(task_id: int, task_data: TaskUpdate):
     """Actualiza una tarea"""
     task = task_service.update_task(task_id, task_data)
     if not task:
+        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
         raise HTTPException(status_code=404, detail="Task not found")
     return task.to_dict()
 
@@ -54,5 +57,6 @@ async def delete_task(task_id: int):
     """Elimina una tarea"""
     success = task_service.delete_task(task_id)
     if not success:
+        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task deleted successfully"}
