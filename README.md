@@ -24,10 +24,10 @@ Usa SQLite por defecto, con arquitectura modular que permite cambiar fácilmente
 
 ## Arquitectura del Sistema
 ```
-API Request → Routes → Services → Models → Response
-     ↓           ↓         ↓         ↓
-  Validación  Endpoints  Lógica   Entidades
-  (Schemas)             Negocio
+API Request → Routes → Service → Repository → Models → Response
+     ↓           ↓        ↓           ↓          ↓
+  Validación  Endpoints Lógica   Abstracción Entidades
+  (Schemas)            Negocio   (Interface)
 ```
 
 ## Flujo de una petición típica:
@@ -48,6 +48,8 @@ API_task/
 │   ├── config.py                     # Configuración
 │   ├── logging/
 │   │   └── logging_system.py         # Configura loguru
+│   ├── middleware/
+│   │   └── error_handler.py          # Manejador de errores
 │   ├── models/
 │   │   └── task.py                   # Entidades de dominio
 │   ├── repositories/
@@ -219,6 +221,19 @@ Via cURL (Listar tareas)
 - Comunidad activa y mantenimiento garantizado
 - Logs estructurados en SQLite para auditoría
 - Serialización automática de excepciones
+
+**¿Por qué middleware centralizado vs try/catch distribuido?**
+- Problema inicial: Cada endpoint manejaba errores manualmente con if not task: raise HTTPException(404), generando código repetitivo y respuestas inconsistentes.
+- Opción 1: Try/catch en cada route
+- - Control granular pero código duplicado
+- - Inconsistencia en formato de errores
+- - Mantenimiento complejo al escalar
+- Opción 2: Middleware centralizado + excepciones de negocio
+- - Separación clara: Services lanzan excepciones, middleware convierte a HTTP
+- - Código limpio en routes (sin try/catch)
+- - Formato consistente de respuestas de error
+- - Escalable y mantenible
+- **Decisión tomada**: Middleware con excepciones personalizadas (NotFoundError, ValidationError) que se convierten automáticamente a respuestas HTTP apropiadas. Los services manejan lógica de negocio y errores específicos, mientras el middleware maneja la traducción a HTTP, siguiendo el principio de responsabilidad única.
 
 
 ## Guía para Desarrolladores

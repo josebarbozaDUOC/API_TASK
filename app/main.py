@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from .routes import health, tasks
+from app.middleware.error_handler import setup_error_handlers
 
 logger.debug("Entrada a main")
 
@@ -19,6 +20,8 @@ app = FastAPI(
     description="API simple para gestión de tareas", 
     version="1.0.0"
 )
+
+setup_error_handlers(app)
 
 # Preparado para frontend web
 app.add_middleware(

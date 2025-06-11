@@ -10,15 +10,21 @@ Este módulo define las rutas de la API REST para operaciones CRUD:
 - PUT /tasks/{id}: Actualizar tarea completa
 - DELETE /tasks/{id}: Eliminar tarea
 
-Todas las rutas incluyen validación automática y manejo de errores.
-Utiliza el servicio definido en config.py
+Responsabilidades:
+- Validación de esquemas (FastAPI + Pydantic automático)
+- Delegación de lógica de negocio al servicio
+- Conversión de respuestas a formato JSON
+
+Manejo de errores:
+- Los servicios lanzan excepciones de negocio (NotFoundError, ValidationError)
+- El middleware convierte automáticamente las excepciones a respuestas HTTP
+- No se requiere manejo manual de errores en los endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from typing import List
 from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
 from app.config import task_service
-from loguru import logger
 
 router = APIRouter()
 
@@ -37,26 +43,17 @@ async def create_task(task_data: TaskCreate):
 @router.get("/tasks/{task_id}", response_model=TaskResponse)
 async def get_task(task_id: int):
     """Obtiene una tarea por ID"""
-    task = task_service.get_task_by_id(task_id)
-    if not task:
-        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
-        raise HTTPException(status_code=404, detail="Task not found")
+    task = task_service.get_task_by_id(task_id)  # Si no existe, lanza NotFoundError automáticamente
     return task.to_dict()
 
 @router.put("/tasks/{task_id}", response_model=TaskResponse)
 async def update_task(task_id: int, task_data: TaskUpdate):
     """Actualiza una tarea"""
-    task = task_service.update_task(task_id, task_data)
-    if not task:
-        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
-        raise HTTPException(status_code=404, detail="Task not found")
+    task = task_service.update_task(task_id, task_data)  # Si no existe, lanza NotFoundError automáticamente
     return task.to_dict()
 
 @router.delete("/tasks/{task_id}", status_code=204)
 async def delete_task(task_id: int):
     """Elimina una tarea"""
-    success = task_service.delete_task(task_id)
-    if not success:
-        logger.bind(action="error", entity='HTTPException', status_code=404, detail="Task not found").info("HTTPException")
-        raise HTTPException(status_code=404, detail="Task not found")
+    task_service.delete_task(task_id)  # Si no existe, lanza NotFoundError automáticamente
     return {"message": "Task deleted successfully"}

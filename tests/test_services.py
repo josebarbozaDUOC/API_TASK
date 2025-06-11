@@ -185,12 +185,15 @@ class TestTaskService:
         mock_repository.get_by_id.assert_called_once_with(1)
 
     def test_get_task_by_id_not_found(self, task_service, mock_repository):
-        """Debe retornar None para tarea inexistente."""
+        """Debe lanzar NotFoundError para tarea inexistente."""
+        from app.middleware.error_handler import NotFoundError
+        
         mock_repository.get_by_id.return_value = None
         
-        result = task_service.get_task_by_id(999)
+        with pytest.raises(NotFoundError) as exc_info:
+            task_service.get_task_by_id(999)
         
-        assert result is None
+        assert "Task 999 not found" in str(exc_info.value)
         mock_repository.get_by_id.assert_called_once_with(999)
 
     # Tests de actualización
@@ -290,13 +293,17 @@ class TestTaskService:
         assert result.description == "Original"  # No cambió
 
     def test_update_task_not_found(self, task_service, mock_repository):
-        """Debe retornar None si la tarea a actualizar no existe."""
+        """Debe lanzar NotFoundError si la tarea a actualizar no existe."""
+        from app.middleware.error_handler import NotFoundError
+        
         mock_repository.get_by_id.return_value = None
         
         update_data = TaskUpdate(title="No importa")
-        result = task_service.update_task(999, update_data)
         
-        assert result is None
+        with pytest.raises(NotFoundError) as exc_info:
+            task_service.update_task(999, update_data)
+        
+        assert "Task 999 not found" in str(exc_info.value)
         mock_repository.get_by_id.assert_called_once_with(999)
         # No debe llamar update si no existe la tarea
         mock_repository.update.assert_not_called()

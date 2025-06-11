@@ -198,7 +198,8 @@ class TestTaskEndpoints:
         
         assert response.status_code == 404
         error = response.json()
-        assert error["detail"] == "Task not found"
+        assert error["error"] == "Not found"
+        assert "Task 999 not found" in error["message"]
 
     def test_get_task_by_id_invalid_id(self, client):
         """Debe fallar con ID inválido."""
@@ -250,7 +251,8 @@ class TestTaskEndpoints:
         
         assert response.status_code == 404
         error = response.json()
-        assert error["detail"] == "Task not found"
+        assert error["error"] == "Not found"
+        assert "Task 999 not found" in error["message"]
 
     def test_update_task_validation_error(self, client, sample_task_data):
         """Debe fallar con datos inválidos."""
@@ -285,7 +287,8 @@ class TestTaskEndpoints:
         
         assert response.status_code == 404
         error = response.json()
-        assert error["detail"] == "Task not found"
+        assert error["error"] == "Not found"
+        assert "Task 999 not found" in error["message"]
 
     def test_delete_task_returns_message(self, client, sample_task_data):
         """Debe retornar mensaje de confirmación al eliminar."""
