@@ -11,14 +11,15 @@ Usa SQLite por defecto, con arquitectura modular que permite cambiar fácilmente
 - **Pydantic**    - Validación de datos
 - **Uvicorn**     - Servidor ASGI
 - **SQLite**      - Base de datos
-- **Loguru**      - Logging
+- **Loguru**      - Logging estructurado
+- **Pytest**      - Testing framework
 
 ## Estado del Proyecto
-**Actualmente**: Sprint 2 completándose
+**Actualmente**: Sprint 2 completo
 - CRUD completo con SQLite `LISTO`
 - Suite de testing implementada `LISTO`
-- Sistema de logging estructurado `EN CURSO`
-- Manejo de errores pendiente `PENDIENTE`
+- Sistema de logging estructurado `LISTO`
+- Manejo de errores `LISTO`
 **Siguiente**: Migración a SQLAlchemy y soporte multi-database
 
 
@@ -93,35 +94,41 @@ API_task/
 - Propósito: Inicializar dependencias (repositorio) según entorno/configuración.
 - Responsabilidad: Inyectar una instancia de TaskRepository en el TaskService.
 
-### 1. Models (app/models/task.py)
+### 1. Logging (app/logging/logging_system.py)
+- Propósito: Sistema de logging centralizado y estructurado.
+- SQLiteHandler personalizado para persistencia en BD
+- Configuración automática con contexto (.bind()) 
+- Responsabilidad: Capturar operaciones CRUD, errores y eventos del sistema con metadata estructurada.
+
+### 2. Models (app/models/task.py)
 - Propósito: Representan las entidades de negocio.
 - class Task:
 - - Propiedades: id, title, description, completed, created_at
 - - Métodos: mark_complete(), to_dict()
 - Responsabilidad: Definir la estructura y comportamiento de una tarea.
 
-### 2. Schemas (app/schemas/task.py)
+### 3. Schemas (app/schemas/task.py)
 - Propósito: Validación y serialización de datos.
 - TaskCreate    `# ← Datos que llegan (input)`
 - TaskResponse  `# → Datos que salen (output)`  
 - TaskUpdate    `# ← Datos para actualizar`
 - Responsabilidad: Garantizar que los datos sean correctos antes de procesarlos.
 
-### 3. Repositories (app/repositories/...)
+### 4. Repositories (app/repositories/...)
 - Propósito: Abstraer el acceso a datos detrás de una interfaz común.
 - - base_repository.py: `Interfaz que define contrato implementado por los demás repositorios.`
 - - memory_repository.py: `Implementa TaskRepository en memoria (una lista). Útil para desarrollo rápido y testing sin persistencia real.`
 - - sqlite_repository.py: `Implementa TaskRepository usando SQLite nativo. Provee persistencia local sin dependencias externas.`
 - Responsabilidad: Proveer operaciones CRUD sin exponer detalles del almacenamiento (memoria, SQLite, etc).
 
-### 4. Services (app/services/task_service.py)
+### 5. Services (app/services/task_service.py)
 - Propósito: Lógica de negocio centralizada.
 - class TaskService:
 - - create_task(), get_all_tasks(), get_task_by_id()
 - - update_task(), delete_task()
 - Responsabilidad: Implementar las reglas de negocio.
 
-### 5. Routes (app/routes/tasks.py)
+### 6. Routes (app/routes/tasks.py)
 - Propósito: Definir endpoints HTTP.
 - GET    /api/v1/tasks      `# Listar todas`
 - POST   /api/v1/tasks      `# Crear nueva`
@@ -130,7 +137,13 @@ API_task/
 - DELETE /api/v1/tasks/{id} `# Eliminar`
 - Responsabilidad: Manejar peticiones HTTP y delegar al service.
 
-### 6. Main (app/main.py)
+### 7. Middleware (app/middleware/error_handler.py)
+- Propósito: Manejo centralizado de errores y excepciones.
+- NotFoundError, ValidationError, InternalServerError
+- Exception handlers automáticos
+- Responsabilidad: Convertir excepciones de negocio a respuestas HTTP consistentes.
+
+### 8. Main (app/main.py)
 - Propósito: Configuración y arranque de la aplicación.
 - Responsabilidad: Crear la app FastAPI, registrar routers, configurar middleware.
 
@@ -146,9 +159,9 @@ Crear Tarea (POST /api/v1/tasks)
 6. Respuesta: {"id": 1, "title": "Comprar pan", "completed": false, ...}
 
 Error Handling
-- Tarea no encontrada → HTTP 404
+- Tarea no encontrada → HTTP 404 (via NotFoundError)
 - Datos inválidos → HTTP 422 (Pydantic automático)
-- Errores internos → HTTP 500 (FastAPI automático)
+- Errores internos → HTTP 500 (via middleware centralizado)
 
 
 ## Configuración y Ejecución

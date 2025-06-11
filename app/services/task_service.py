@@ -7,6 +7,10 @@ Este módulo contiene toda la lógica de aplicación para operaciones CRUD de ta
 Implementa el patrón Repository para desacoplar la lógica de negocio
 del almacenamiento. No conoce ni le importa si usa memoria, SQLite, etc.
 
+Nota: Los métodos de modificación (GET/UPDATE/DELETE) usan _ensure_task_exists()
+para validar existencia antes de proceder. Esto genera logs con function='_ensure_task_exists'
+pero mantiene el action correcto ('get_by_id', 'update', 'delete').
+
 Classes:
     TaskService: Maneja todas las operaciones de negocio de tareas
 """
@@ -41,39 +45,31 @@ class TaskService:
         logger.bind(action="get_all", entity=self.entity, count=len(tasks)).info("Entidades obtenidas")
         return tasks
     
+    def _ensure_task_exists(self, task_id: int, action: str) -> Task:
+        """Helper privado para validar existencia con contexto correcto"""
+        task = self.repository.get_by_id(task_id)
+        if not task:
+            logger.bind(action=action, entity=self.entity, id=task_id).warning("Entidad no encontrada")
+            raise_not_found("Task", task_id)
+        assert task is not None # Type assertion a Pylance
+        return task
+
     def get_task_by_id(self, task_id: int) -> Task:
         """Busca una tarea por ID"""
-        task = self.repository.get_by_id(task_id)
-
-        if not task:
-            logger.bind(action="get_by_id", entity=self.entity, id=task_id).warning("Entidad no encontrada")
-            raise_not_found("Task", task_id)
-        
-        assert task is not None # Type assertion a Pylance
-
+        task = self._ensure_task_exists(task_id, "get_by_id")
         logger.bind(action="get_by_id", entity=self.entity, id=task_id).info("Entidad encontrada")
         return task
     
     def update_task(self, task_id: int, task_data: TaskUpdate) -> Task:
         """Actualiza una tarea existente"""
-        existing_task = self.repository.get_by_id(task_id)
-        
-        # REFACTOR POSIBLE: El get_by_id ya hace log "no encontrada" y lanza excepción
-        if existing_task is None:
-            logger.bind(action="update", entity=self.entity, id=task_id).warning("Entidad no encontrada")
-            raise_not_found("Task", task_id)
-        
-        # Type assertion: le decimos a Pylance que aquí existing_task YA NO es None
-        assert existing_task is not None
+        existing_task = self._ensure_task_exists(task_id, "update")
         
         update_fields = task_data.model_dump(exclude_unset=True)
         for field, value in update_fields.items():
             setattr(existing_task, field, value)
         
         updated_task = self.repository.update(task_id, existing_task)
-        
-        # Type assertion para el resultado del update
-        assert updated_task is not None
+        assert updated_task is not None # Type assertion para el resultado del update
         
         logger.bind(action="update", entity=self.entity, id=task_id, fields=list(update_fields.keys())).info("Entidad actualizada")
         return updated_task
@@ -81,12 +77,7 @@ class TaskService:
     def delete_task(self, task_id: int) -> bool:
         """Elimina una tarea"""
 
-        existing_task = self.repository.get_by_id(task_id)
-
-        # REFACTOR POSIBLE: El get_by_id ya hace log "no encontrada" y lanza excepción
-        if not existing_task:
-            logger.bind(action="delete", entity=self.entity, id=task_id).warning("Entidad no encontrada")
-            raise_not_found("Task", task_id)
+        self._ensure_task_exists(task_id, "delete")
 
         success = self.repository.delete(task_id)
         logger.bind(action="delete", entity=self.entity, id=task_id, success=success).info("Entidad procesada")
