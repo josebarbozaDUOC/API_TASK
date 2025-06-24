@@ -1,0 +1,12 @@
+# docker-compose.yml
+services:
+  backend:
+    build: ./backend
+    container_name: api-task-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./storage:/app/storage
+    env_file:
+      - ./backend/.env

@@ -1,14 +1,17 @@
 HOW TO USE
 
+# Docker: 
+#-----------------------------BUILD AND RUN
+docker-compose up
+
+
+# O Manualmente:
 #-----------------------------BUILD
 # Actualizar PIP
 python.exe -m pip install --upgrade pip
 
 # Instalar dependencias
 pip install -r requirements.txt
-
-# Prepara entorno con db
-python scripts/init_db.py
 
 #-----------------------------RUN
 # Ejecutar (desde ROOT)
@@ -17,12 +20,12 @@ python -m app.main
 # O con uvicorn directamente
 uvicorn app.main:app --reload
 
+
+
 #-----------------------------TEST
 # Desde el navegador
 http://localhost:8000/api/v1/health
 http://localhost:8000/docs
-
-
 
 # Ver desde powershell
 curl http://localhost:8000/api/v1/tasks

@@ -1,3 +1,7 @@
+#-------------------------------------- NO ignorar
+!.env.example
+
+#-------------------------------------- Ignorar
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
