@@ -279,7 +279,7 @@ uvicorn src.main:app --reload
 **Test suite completo con pytest:**
 
 - ✅ Tests unitarios (models, schemas, services)
-- ✅ Tests de repositorios (memory, SQLite)
+- ✅ Tests de repositorios (memory, SQLite, PostgreSQL)
 - ✅ Tests de integración (endpoints)
 - ✅ Cobertura >90%
 
