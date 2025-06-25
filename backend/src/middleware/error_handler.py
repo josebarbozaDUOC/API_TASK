@@ -1,4 +1,4 @@
-# backend/app/middleware/error_handler.py
+# backend/src/middleware/error_handler.py
 
 """
 Sistema de manejo de errores centralizado para FastAPI.
@@ -14,7 +14,7 @@ Características:
 
 Uso:
    # En main.py
-   from app.middleware.error_handler import setup_error_handlers
+   from src.middleware.error_handler import setup_error_handlers
    setup_error_handlers(app)
    
    # En servicios

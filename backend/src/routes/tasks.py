@@ -1,4 +1,4 @@
-# backend/app/routes/tasks.py
+# backend/src/routes/tasks.py
 
 """
 Endpoints HTTP para la gestión de tareas.
@@ -23,8 +23,8 @@ Manejo de errores:
 
 from fastapi import APIRouter
 from typing import List
-from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
-from app.config.dependencies import task_service
+from src.schemas.task import TaskCreate, TaskResponse, TaskUpdate
+from src.config.dependencies import task_service
 
 router = APIRouter()
 

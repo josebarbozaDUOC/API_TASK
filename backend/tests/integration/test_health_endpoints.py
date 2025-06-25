@@ -14,7 +14,7 @@ Ejecución:
 import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime
-from app.main import app
+from src.main import app
 
 class TestHealthEndpoints:
     """Tests para endpoints de health check."""
@@ -39,7 +39,7 @@ class TestHealthEndpoints:
         
         # Verificar contenido
         assert data["status"] == "healthy"
-        assert data["message"] == "Todo API is running"
+        assert data["message"] == "Todo API Task is running"
         assert data["version"] == "1.0.0"
         
         # Verificar que timestamp es válido

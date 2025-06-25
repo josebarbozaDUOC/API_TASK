@@ -23,8 +23,8 @@ SPRINT 3: CONTAINERIZACIÓN BÁSICA ✅ (COMPLETADO)
 
 SPRINT 4: SQLALCHEMY & RELACIONALES 🔄 (EN CURSO)
 •	STORY 15: Migración a SQLAlchemy ORM ✅ (base.py + task_orm.py)
-•	STORY 16: PostgreSQL Repository + Docker Compose
-•	STORY 17: MySQL Repository + Docker Compose
+•	STORY 16: PostgreSQL Repository + Docker Compose ✅
+•	STORY 17: MySQL Repository + Docker Compose 🔄
 •	STORY 18: Database Factory Pattern
 •	STORY 19: Connection Pooling y Async
 •	STORY 20: Revisión y Documentación

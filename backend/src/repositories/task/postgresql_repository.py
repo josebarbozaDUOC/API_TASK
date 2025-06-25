@@ -1,31 +1,35 @@
-# backend/app/repositories/task/sqlite_repository.py
+# backend/src/repositories/task/postgresql_repository.py
 
 """
-Repositorio SQLite para Task usando SQLAlchemy.
+Repositorio PostgreSQL para Task usando SQLAlchemy.
 
 Implementa la interfaz TaskRepository usando SQLAlchemy ORM
 en lugar de SQL crudo para mejor mantenibilidad.
 
 Referencias:
 - https://docs.sqlalchemy.org/en/20/orm/session_basics.html
+- https://github.com/psycopg/psycopg#readme
 """
 
 from typing import List, Optional
 from contextlib import contextmanager
 from sqlalchemy.orm import Session
-from app.models.task import Task
-from app.models.task_orm import TaskORM
-from app.repositories.task.base_repository import TaskRepository
-from app.database.base import Base, get_engine, get_session_factory
-from app.config.settings import settings
+from src.models.task import Task
+from src.models.task_orm import TaskORM
+from src.repositories.task.base_repository import TaskRepository
+from src.database.base import Base, get_engine, get_session_factory
+from src.config.settings import settings
 
 
-class SqliteTaskRepository(TaskRepository):
-    """Implementación que guarda las tareas en SQLite usando SQLAlchemy."""
+class PostgresqlTaskRepository(TaskRepository):
+    """Implementación que guarda las tareas en PostgreSQL usando SQLAlchemy."""
     
-    def __init__(self, db_path: str = settings.task_db_absolute_path):
-        # Crear URL de conexión SQLite
-        self.database_url = f"sqlite:///{db_path}"
+    def __init__(self, connection_url: Optional[str] = None):
+        # Usar URL proporcionada o construir desde settings
+        if connection_url:
+            self.database_url = connection_url
+        else:
+            self.database_url = settings.postgres_url
         
         # Inicializar engine y sesiones
         self.engine = get_engine(self.database_url)

@@ -1,4 +1,4 @@
-# backend/app/services/task_service.py
+# backend/src/services/task_service.py
 
 """
 Servicio de lógica de negocio para la gestión de tareas.
@@ -16,10 +16,10 @@ Classes:
 """
 
 from typing import List, Optional
-from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
-from app.repositories.task.base_repository import TaskRepository
-from app.middleware.error_handler import raise_not_found, raise_validation_error
+from src.models.task import Task
+from src.schemas.task import TaskCreate, TaskUpdate
+from src.repositories.task.base_repository import TaskRepository
+from src.middleware.error_handler import raise_not_found, raise_validation_error
 from loguru import logger
 
 ENTITY = "task" # Define qué tipo de entidad maneja este servicio

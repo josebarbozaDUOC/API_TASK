@@ -20,8 +20,10 @@ HTML (entrar desde ruta file:///D:/PROYECTOS/API_TASK/htmlcov/function_index.htm
 """
 
 import pytest
-from app.repositories.task.memory_repository import MemoryTaskRepository
-from app.services.task_service import TaskService
+from src.repositories.task.memory_repository import MemoryTaskRepository
+from src.repositories.task.sqlite_repository import SqliteTaskRepository
+from src.services.task_service import TaskService
+from src.config.settings import settings
 
 @pytest.fixture
 def clean_repository():

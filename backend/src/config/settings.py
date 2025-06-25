@@ -1,4 +1,4 @@
-# backend/app/config/settings.py
+# backend/src/config/settings.py
 """
 Configuración centralizada del proyecto usando Pydantic Settings.
 
@@ -7,14 +7,12 @@ Lee configuración en orden de prioridad:
 2. Archivos .env y .env.example (fallback)
 
 Auto-detecta Docker vs desarrollo local para rutas de base de datos.
-
-Referencias:
-   - FastAPI Settings: https://fastapi.tiangolo.com/advanced/settings/
-   - Pydantic Settings: https://docs.pydantic.dev/latest/concepts/pydantic_settings/
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
+# Encontrar la raíz del proyecto (API_task/)
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 class Settings(BaseSettings):
     """Configuración del proyecto Todo API Task."""
@@ -34,7 +32,15 @@ class Settings(BaseSettings):
     
     # Repository
     repository_type: str = ""
+    test_repository_type: str = ""
     
+    # PostgreSQL
+    postgres_host: str = ""
+    postgres_port: int = 5432
+    postgres_db: str = ""
+    postgres_user: str = ""
+    postgres_password: str = ""
+
     # Logging
     log_level: str = ""
     
@@ -55,34 +61,39 @@ class Settings(BaseSettings):
         """Verifica si está en desarrollo."""
         return self.environment == "development"
     
-    @property
-    def log_db_absolute_path(self) -> str:
-        """Ruta absoluta a logs DB. Auto-detecta Docker vs local."""
+    def _get_db_path(self, db_path: str) -> str:
+        """Helper para obtener rutas absolutas de DBs."""
         if Path("/app/storage").exists():
-            path = f"/app/{self.log_db_path}"
+            path = f"/app/{db_path}"
         else:
-            project_root = Path(__file__).parent.parent.parent.parent
-            path = str(project_root / self.log_db_path)
+            path = str(ROOT_DIR / db_path)
         
-        # ✅ Auto-crear directorio si no existe
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         return path
+    
+    @property
+    def log_db_absolute_path(self) -> str:
+        """Ruta absoluta a logs DB."""
+        return self._get_db_path(self.log_db_path)
 
     @property
     def task_db_absolute_path(self) -> str:
-        """Ruta absoluta a tasks DB. Auto-detecta Docker vs local."""
-        if Path("/app/storage").exists():
-            path = f"/app/{self.task_db_path}"
-        else:
-            project_root = Path(__file__).parent.parent.parent.parent
-            path = str(project_root / self.task_db_path)
-        
-        # ✅ Auto-crear directorio si no existe  
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        return path
+        """Ruta absoluta a tasks DB."""
+        return self._get_db_path(self.task_db_path)
+    
+    @property
+    def postgres_url(self) -> str:
+        """Construye la URL de conexión PostgreSQL."""
+        return (
+            f"postgresql+psycopg://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
 
     model_config = SettingsConfigDict(
-        env_file=[".env.example", ".env"]
+        env_file=[
+            str(ROOT_DIR / ".env.example"),
+            str(ROOT_DIR / ".env")
+        ]
     )
 
 

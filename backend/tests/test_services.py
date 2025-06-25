@@ -41,10 +41,10 @@ Ejecución:
 import pytest
 from unittest.mock import Mock, call
 from datetime import datetime
-from app.services.task_service import TaskService
-from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate
-from app.repositories.task.base_repository import TaskRepository
+from src.services.task_service import TaskService
+from src.models.task import Task
+from src.schemas.task import TaskCreate, TaskUpdate
+from src.repositories.task.base_repository import TaskRepository
 
 
 class TestTaskService:
@@ -186,7 +186,7 @@ class TestTaskService:
 
     def test_get_task_by_id_not_found(self, task_service, mock_repository):
         """Debe lanzar NotFoundError para tarea inexistente."""
-        from app.middleware.error_handler import NotFoundError
+        from src.middleware.error_handler import NotFoundError
         
         mock_repository.get_by_id.return_value = None
         
@@ -294,7 +294,7 @@ class TestTaskService:
 
     def test_update_task_not_found(self, task_service, mock_repository):
         """Debe lanzar NotFoundError si la tarea a actualizar no existe."""
-        from app.middleware.error_handler import NotFoundError
+        from src.middleware.error_handler import NotFoundError
         
         mock_repository.get_by_id.return_value = None
         

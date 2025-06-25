@@ -1,4 +1,4 @@
-# backend/app/repositories/task/base_repository.py
+# backend/src/repositories/task/base_repository.py
 
 """
 Repositorio base solo para Task
@@ -6,7 +6,7 @@ Repositorio base solo para Task
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from app.models.task import Task
+from src.models.task import Task
 
 class TaskRepository(ABC):
     """

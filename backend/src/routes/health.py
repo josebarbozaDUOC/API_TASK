@@ -1,11 +1,11 @@
-# backend/app/routes/health.py
+# backend/src/routes/health.py
 """
 Endpoint de health check para monitoreo de la API.
 Proporciona información básica sobre el estado y salud del servicio.
 """
 from fastapi import APIRouter
 from datetime import datetime
-from app.config.settings import settings
+from src.config.settings import settings
 
 router = APIRouter()
 

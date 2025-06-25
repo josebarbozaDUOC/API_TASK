@@ -1,4 +1,4 @@
-# backend/app/logging/logging_system.py
+# backend/src/logging/logging_system.py
 
 """
 Sistema de logging personalizado con almacenamiento en SQLite.
@@ -7,7 +7,7 @@ Proporciona una implementación de logging usando Loguru con persistencia
 en base de datos SQLite para análisis y auditoría de logs.
 
 Setup:
-    from app.logging.logging_system import setup_logging
+    from src.logging.logging_system import setup_logging
     from loguru import logger
     setup_logging()
 
@@ -23,7 +23,7 @@ Uso con contexto:
 import sqlite3
 import json
 from loguru import logger
-from app.config.settings import settings
+from src.config.settings import settings
 
 # Guard global para evitar configuración múltiple
 _logging_configured = False

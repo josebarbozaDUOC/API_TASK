@@ -1,4 +1,4 @@
-# backend/app/schemas/task.py
+# backend/src/schemas/task.py
 
 """
 Esquemas de validación y serialización para la entidad Task.

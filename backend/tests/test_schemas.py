@@ -40,7 +40,7 @@ Ejecución:
 import pytest
 from datetime import datetime
 from pydantic import ValidationError
-from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
+from src.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 
 class TestTaskSchemas:
     """Tests para schemas de Task."""

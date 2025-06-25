@@ -1,4 +1,4 @@
-# backend/app/models/task.py
+# backend/src/models/task.py
 
 """
 Entidad de dominio: Task

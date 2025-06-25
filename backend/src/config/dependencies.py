@@ -1,18 +1,20 @@
-# backend/app/config/dependencies.py
+# backend/src/config/dependencies.py
 
 """Dependencias globales de la aplicación."""
 
 from enum import Enum
-from app.config.settings import settings
-from app.services.task_service import TaskService
-from app.repositories.task.memory_repository import MemoryTaskRepository
-from app.repositories.task.sqlite_repository import SqliteTaskRepository
+from src.config.settings import settings
+from src.services.task_service import TaskService
+from src.repositories.task.memory_repository import MemoryTaskRepository
+from src.repositories.task.sqlite_repository import SqliteTaskRepository
+from src.repositories.task.postgresql_repository import PostgresqlTaskRepository
 from loguru import logger
 
 # Mapeo de repositorios
 class RepoType(Enum):
-    MEMORY = MemoryTaskRepository
-    SQLITE = SqliteTaskRepository
+    MEMORY      = MemoryTaskRepository
+    SQLITE      = SqliteTaskRepository
+    POSTGRES    = PostgresqlTaskRepository
 
 # Crear el repositorio basado en settings
 def create_task_service() -> TaskService:

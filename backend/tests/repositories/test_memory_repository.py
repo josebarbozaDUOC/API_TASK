@@ -38,8 +38,8 @@ Ejecución:
 
 import pytest
 from datetime import datetime
-from app.repositories.task.memory_repository import MemoryTaskRepository
-from app.models.task import Task
+from src.repositories.task.memory_repository import MemoryTaskRepository
+from src.models.task import Task
 
 
 class TestMemoryTaskRepository:

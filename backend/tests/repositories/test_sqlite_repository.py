@@ -40,8 +40,8 @@ import pytest
 import tempfile
 import os
 from datetime import datetime
-from app.repositories.task.sqlite_repository import SqliteTaskRepository
-from app.models.task import Task
+from src.repositories.task.sqlite_repository import SqliteTaskRepository
+from src.models.task import Task
 
 class TestSqliteTaskRepository:
     """Pruebas para la implementación SqliteTaskRepository."""

@@ -1,4 +1,4 @@
-# backend/app/repositories/task/memory_repository.py
+# backend/src/repositories/task/memory_repository.py
 
 """
 Repositorio memoria ram solo para Task (almacena en lista)
@@ -11,8 +11,8 @@ Características:
 
 from typing import List, Optional
 from datetime import datetime
-from app.models.task import Task
-from app.repositories.task.base_repository import TaskRepository
+from src.models.task import Task
+from src.repositories.task.base_repository import TaskRepository
 
 class MemoryTaskRepository(TaskRepository):
     def __init__(self):

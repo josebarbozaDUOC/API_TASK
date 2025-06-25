@@ -1,4 +1,4 @@
-# backend/app/main.py
+# backend/src/main.py
 """
 Módulo principal de la aplicación FastAPI.
 
@@ -9,9 +9,9 @@ Incluye CORS para soporte de frontend web y proporciona endpoints de documentaci
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from app.config.settings import settings
+from src.config.settings import settings
 from .routes import health, tasks
-from app.middleware.error_handler import setup_error_handlers
+from src.middleware.error_handler import setup_error_handlers
 
 logger.debug("Entrada a main")
 
@@ -48,4 +48,4 @@ app.include_router(tasks.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host=settings.host, port=settings.port, reload=False)
+    uvicorn.run("src.main:app", host=settings.host, port=settings.port, reload=False)

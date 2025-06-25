@@ -13,8 +13,8 @@ Incluye:
 - 🐳 Containerización con **Docker** y Compose
 - 🧠 Validación con **Pydantic**
 - 📄 Logging estructurado con **Loguru**
-- 🗃️ Repositorios para **SQLite**, próximamente **PostgreSQL** y **MySQL**
-- 🔄 Evaluación de **SQLAlchemy** vs **SQLModel**
+- 🗃️ Repositorios para **SQLite**, **PostgreSQL** y próximamente **MySQL**
+- 🔄 Integración con **SQLAlchemy** ORM (evaluando **SQLModel**)
 - 🧪 Middleware y manejo centralizado de errores
 - 🌱 Exploración inicial de **12factor** y **PEP8**
 
@@ -32,11 +32,19 @@ Ideal para construir APIs reales, como base de nuevos proyectos o para tu portaf
 - **Pytest** - Testing framework
 
 ## Estado del Proyecto
-**Actualmente**: Sprint 4 en curso
-- Migración a SQLAlchemy ORM `LISTO`
-- Probar SQLmodel `EN CURSO`
+**Completados**: 
+- Sprint 1: BASE SÓLIDA
+- Sprint 2: PERSISTENCIA REAL
+- Sprint 3: CONTAINERIZACIÓN BÁSICA
 
-**Siguiente**: Integración Multi-DB (PostgreSQL, MySQL)
+**Actualmente**: 
+- Sprint 4 - SQLALCHEMY & RELACIONALES
+  - ✅ STORY 15: Migración a SQLAlchemy ORM
+  - ✅ STORY 16: PostgreSQL Repository + Docker Compose
+  - 🔄 STORY 17: MySQL Repository + Docker Compose
+  - STORY 18: Database Factory Pattern
+  - STORY 19: Connection Pooling y Async
+  - STORY 20: Revisión y Documentación
 
 
 ## Arquitectura del Sistema
@@ -47,11 +55,29 @@ API Request → Routes → Service → Repository → Models → Response
   (Schemas)            Negocio   (Interface)
 ```
 
+
+## Flujos de Datos
+
+**Crear Tarea (POST /api/v1/tasks)**
+1. Cliente envía: {"title": "Comprar pan"}
+2. FastAPI valida el JSON contra TaskCreate schema
+3. Router (tasks.py) recibe la petición válida
+4. Service (task_service.py) ejecuta la lógica de negocio via repository
+5. Model (Task) representa la entidad creada
+6. Respuesta se serializa usando TaskResponse schema
+7. Cliente recibe: {"id": 1, "title": "Comprar pan", "completed": false, ...}
+
+**Error Handling**
+- Tarea no encontrada → HTTP 404 (via NotFoundError)
+- Datos inválidos → HTTP 422 (Pydantic automático)
+- Errores internos → HTTP 500 (via middleware centralizado)
+
+
 ## Estructura de Archivos
 ```
 API_task/
 ├── backend/
-│   ├── app/
+│   ├── src/
 │   │   ├── __init__.py                   # Inicializaciones 
 │   │   ├── main.py                       # Punto de entrada
 │   │   ├── config/
@@ -68,9 +94,10 @@ API_task/
 │   │   │   └── task_orm.py               # Modelo ORM para Task
 │   │   ├── repositories/
 │   │   │   └── task/
-│   │   │       ├── base_repository.py    # Interface TaskRepository
-│   │   │       ├── memory_repository.py  # MemoryTaskRepository
-│   │   │       └── sqlite_repository.py  # SqliteTaskRepository
+│   │   │       ├── base_repository.py        # Interface TaskRepository
+│   │   │       ├── memory_repository.py      # MemoryTaskRepository
+│   │   │       └── sqlite_repository.py      # SqliteTaskRepository
+│   │   │       └── postgresql_repository.py  # PostgresqlTaskRepository
 │   │   ├── routes/
 │   │   │   ├── health.py                 # Health check
 │   │   │   └── tasks.py                  # Endpoints de tareas
@@ -86,13 +113,12 @@ API_task/
 │   │   ├── repositories/                 # Test de Repositorios
 │   │   │   ├── test_memory_repository.py
 │   │   │   └── test_sqlite_repository.py
+│   │   │   └── test_postgresql_repository.py
 │   │   ├── conftest.py                   # Configuraciones de test
 │   │   ├── test_models.py                # Test de model Task
 │   │   ├── test_schemas.py               # Test de esquema Pydantic
 │   │   └── test_services.py              # Test de task_service
 │   │
-│   ├── .env                              # Variables de entorno (local)
-│   ├── .env.example                      # Configuración por defecto
 │   ├── Dockerfile                        # Imagen Docker de backend con healthcheck
 │   ├── requirements.txt                  # Dependencias Python
 │   └── coverage.svg                      # % Cobertura de los tests
@@ -106,8 +132,10 @@ API_task/
 │   ├── ROADMAP.md                        # Sprints & Stories
 │   └── solid-principles.md               # Guía principios SOLID
 │
-├── docker-compose.yml                    # Orquestador de servicios
+├── .env                                  # Variables de entorno (local)
+├── .env.example                          # Configuración por defecto
 ├── .gitignore
+├── docker-compose.yml                    # Orquestador de servicios
 └── README.md
 ```
 
@@ -173,40 +201,75 @@ API_task/
 - Responsabilidad: Crear la app FastAPI, registrar routers, configurar middleware.
 
 
-## Flujos de Datos
-
-**Crear Tarea (POST /api/v1/tasks)**
-1. Cliente envía: {"title": "Comprar pan"}
-2. FastAPI valida el JSON contra TaskCreate schema
-3. Router (tasks.py) recibe la petición válida
-4. Service (task_service.py) ejecuta la lógica de negocio via repository
-5. Model (Task) representa la entidad creada
-6. Respuesta se serializa usando TaskResponse schema
-7. Cliente recibe: {"id": 1, "title": "Comprar pan", "completed": false, ...}
-
-**Error Handling**
-- Tarea no encontrada → HTTP 404 (via NotFoundError)
-- Datos inválidos → HTTP 422 (Pydantic automático)
-- Errores internos → HTTP 500 (via middleware centralizado)
-
-
 ## Configuración y Ejecución
 
+**Configuración**
+```
+# Revisa .env.example para todas las opciones de configuración disponibles.
+# Copiar archivo de configuración
+cp .env.example .env
+
+# Editar credenciales para uso de PostgreSQL
+# POSTGRES_USER, POSTGRES_PASSWORD, etc.
+```
+
 **Docker (Recomendado):**
-```docker-compose up --build```
+```
+docker-compose up --build
+```
 
 **Local:**
 ```
 cd backend/
-cp .env.example .env  # Configurar variables si es necesario
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn src.main:app --reload
 ```
 
-**URLs importantes:**
+**Verificar:**
 - API: ```http://localhost:8000```
 - Documentación: ```http://localhost:8000/docs```
 - Health Check: ```http://localhost:8000/api/v1/health```
+
+
+## Guía para Desarrolladores
+
+**Cambiar configuración:**
+- Todo en `.env.example` (fuente única de verdad)
+- `.env` para credenciales y secretos
+- `settings.py` lee automáticamente los valores
+
+**Agregar nuevo endpoint:**
+- Definir schema en `schemas/`
+- Agregar método en `TaskService`
+- Crear endpoint en `routes/`
+- Probar en `/docs`
+
+**Modificar lógica de negocio:**
+- Todo en `services/task_service.py`
+- Los endpoints solo delegan, no contienen lógica
+
+**Modificar storage (repositorios):**
+- Agregar nuevos en `repositories/`
+- Registrar en `config/dependencies.py`
+- Cambiar `REPOSITORY_TYPE` en `.env.example`
+
+**Cambiar validaciones:**
+- Modificar schemas en `schemas/task.py`
+- Pydantic se encarga del resto automáticamente
+
+**Debugging:**
+- Logs aparecen en consola y `storage/logs.db`
+- `/docs` muestra errores de validación interactivos
+- FastAPI devuelve stack traces detallados en desarrollo
+- Healthcheck en `/api/v1/health` para monitoreo
+
+## Principio clave
+**Cada archivo tiene una responsabilidad clara.**
+- ¿Cambiar validaciones? → `schemas/`
+- ¿Cambiar endpoints? → `routes/`
+- ¿Agregar storage? → `repositories/`
+- ¿Cambiar storage? → `config/dependencies.py`
+- ¿Modificar configuración? → `.env.example`
 
 
 ## Test
@@ -294,43 +357,3 @@ curl http://localhost:8000/api/v1/tasks
 - Creado por el mismo autor de FastAPI, diseñado para integrarse perfectamente
 - Reduce código duplicado manteniendo type safety
 - **Próximo experimento**: Implementar con SQLModel en rama separada para comparar complejidad vs beneficios antes de decidir el approach final.
-
-
-## Guía para Desarrolladores
-
-**Cambiar configuración:**
-- Todo en `.env.example` (fuente única de verdad)
-- `settings.py` lee automáticamente los valores
-
-**Agregar nuevo endpoint:**
-- Definir schema en `schemas/`
-- Agregar método en `TaskService`
-- Crear endpoint en `routes/`
-- Probar en `/docs`
-
-**Modificar lógica de negocio:**
-- Todo en `services/task_service.py`
-- Los endpoints solo delegan, no contienen lógica
-
-**Modificar storage (repositorios):**
-- Agregar nuevos en `repositories/`
-- Registrar en `config/dependencies.py`
-- Cambiar `REPOSITORY_TYPE` en `.env.example`
-
-**Cambiar validaciones:**
-- Modificar schemas en `schemas/task.py`
-- Pydantic se encarga del resto automáticamente
-
-**Debugging:**
-- Logs aparecen en consola y `storage/logs.db`
-- `/docs` muestra errores de validación interactivos
-- FastAPI devuelve stack traces detallados en desarrollo
-- Healthcheck en `/api/v1/health` para monitoreo
-
-## Principio clave
-**Cada archivo tiene una responsabilidad clara.**
-- ¿Cambiar validaciones? → `schemas/`
-- ¿Cambiar endpoints? → `routes/`
-- ¿Agregar storage? → `repositories/`
-- ¿Cambiar storage? → `config/dependencies.py`
-- ¿Modificar configuración? → `.env.example`

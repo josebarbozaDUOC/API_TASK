@@ -25,10 +25,10 @@ Ejecución:
 import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime
-from app.main import app
-from app.repositories.task.memory_repository import MemoryTaskRepository
-from app.services.task_service import TaskService
-from app.routes import tasks  # Importar el módulo para modificar task_service
+from src.main import app
+from src.repositories.task.memory_repository import MemoryTaskRepository
+from src.services.task_service import TaskService
+from src.routes import tasks  # Importar el módulo para modificar task_service
 
 class TestTaskEndpoints:
     """Tests de integración para endpoints de tareas."""

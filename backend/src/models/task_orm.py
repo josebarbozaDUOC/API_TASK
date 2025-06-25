@@ -1,4 +1,4 @@
-# backend/app/models/task_orm.py
+# backend/src/models/task_orm.py
 
 """
 Modelo ORM para Task.
@@ -12,8 +12,8 @@ Referencias:
 """
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from app.database.base import Base
-from app.models.task import Task
+from src.database.base import Base
+from src.models.task import Task
 from sqlalchemy.orm import Mapped, mapped_column
 from typing import Optional
 from datetime import datetime
@@ -26,7 +26,7 @@ class TaskORM(Base):
     # Definición de columnas con tipos correctos para Pylance
     id:         Mapped[Optional[int]]   = mapped_column(Integer, primary_key=True, index=True)
     title:      Mapped[str]             = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]]  = mapped_column(String(500), default="")
+    description: Mapped[Optional[str]]  = mapped_column(String(500), nullable=True, default=None)
     completed:  Mapped[bool]            = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime]        = mapped_column(DateTime, nullable=False)
    

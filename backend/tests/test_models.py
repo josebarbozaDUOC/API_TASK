@@ -27,7 +27,7 @@ Ejecución:
 
 import pytest
 from datetime import datetime, timedelta
-from app.models.task import Task
+from src.models.task import Task
 
 
 class TestTaskModel:
