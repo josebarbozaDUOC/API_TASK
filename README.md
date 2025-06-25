@@ -16,11 +16,11 @@ Con separación clara de responsabilidades y diseño extensible.
 - **Pytest** - Testing framework
 
 ## Estado del Proyecto
-**Actualmente**: Sprint 3 completo
-- Docker implementado `LISTO`
-- Configuración centralizada `LISTO`
+**Actualmente**: Sprint 4 en curso
+- Migración a SQLAlchemy ORM `LISTO`
+- Probar SQLmodel `EN CURSO`
 
-**Siguiente**: Migración a SQLAlchemy y soporte multi-database
+**Siguiente**: Integración Multi-DB (PostgreSQL, MySQL)
 
 
 ## Arquitectura del Sistema
@@ -41,12 +41,15 @@ API_task/
 │   │   ├── config/
 │   │   │   ├── dependencies.py           # Inyección de dependencias
 │   │   │   └── settings.py               # Configuración centralizada
+│   │   ├── database/
+│   │   │   ├── base.py                   # Configuración SQLAlchemy ORM
 │   │   ├── logging/
 │   │   │   └── logging_system.py         # Configura logging (loguru)
 │   │   ├── middleware/
 │   │   │   └── error_handler.py          # Manejador de errores
 │   │   ├── models/
 │   │   │   └── task.py                   # Entidades de dominio
+│   │   │   └── task_orm.py               # Modelo ORM para Task
 │   │   ├── repositories/
 │   │   │   └── task/
 │   │   │       ├── base_repository.py    # Interface TaskRepository
@@ -83,11 +86,12 @@ API_task/
 │   └── tasks.db
 │
 ├── docs/                                 # Documentación del proyecto
-│   └── quick_start.txt                   # Guía rápida
+│   ├── quick_start.txt                   # Guía rápida
+│   ├── ROADMAP.md                        # Sprints & Stories
+│   └── solid-principles.md               # Guía principios SOLID
 │
 ├── docker-compose.yml                    # Orquestador de servicios
 ├── .gitignore
-├── quick_start.txt
 └── README.md
 ```
 
@@ -191,7 +195,7 @@ uvicorn app.main:app --reload
 
 ## Test
 
-![coverage](coverage.svg)
+![coverage](backend/coverage.svg)
 
 **Test suite completo con pytest:**
 
@@ -254,6 +258,26 @@ curl http://localhost:8000/api/v1/tasks
 **¿Por qué Docker vs ambiente virtual tradicional?**
 - Problema inicial: Desarrollo con venv requería configuración manual del entorno y dependencias del sistema.
 - **Decisión tomada**: Arquitectura containerizada modular donde cada servicio (backend) tiene su propio Dockerfile. Docker-compose orquesta múltiples servicios con healthcheck automático, garantizando consistencia entre desarrollo/producción y facilitando escalabilidad futura.
+
+**¿Por qué SQLAlchemy ORM vs SQL crudo?**
+- Problema inicial: El repositorio SQLite usaba SQL crudo con queries manuales, propenso a SQL injection y difícil de mantener con cambios de esquema.
+- Opción 1: Mantener SQL crudo → Control total, pero más código boilerplate y riesgo de errores
+- Opción 2: Usar un micro-ORM (como raw queries con pandas) → Más simple que SQL puro, pero limitado
+- Opción 3: ORM completo (SQLAlchemy) → Abstracción robusta, type safety, migraciones
+- **Decisión tomada**: SQLAlchemy ORM con modelos separados (Task para dominio, TaskORM para persistencia). Mantiene la arquitectura limpia mientras provee seguridad contra SQL injection, queries type-safe, y facilita migraciones futuras.
+
+**¿Por qué modelos separados (Task + TaskORM) vs modelo único?**
+- Problema inicial: Mezclar responsabilidades de dominio y persistencia en una sola clase viola el principio de responsabilidad única.
+- Opción 1: Un solo modelo que herede de SQLAlchemy Base → Más simple, pero acopla el dominio a la BD
+- Opción 2: Modelos separados con conversión manual → Más código, pero desacoplado
+- Opción 3: SQLModel (próximo experimento) → Promete unificar Pydantic + SQLAlchemy en un modelo
+- **Decisión tomada**: Modelos separados por ahora. Task permanece como entidad de dominio pura, TaskORM maneja persistencia. Permite cambiar de ORM sin afectar la lógica de negocio.
+
+**¿Por qué explorar SQLModel como alternativa?**
+- SQLModel unifica validación (Pydantic) + ORM (SQLAlchemy) + serialización en un solo modelo
+- Creado por el mismo autor de FastAPI, diseñado para integrarse perfectamente
+- Reduce código duplicado manteniendo type safety
+- **Próximo experimento**: Implementar con SQLModel en rama separada para comparar complejidad vs beneficios antes de decidir el approach final.
 
 
 ## Guía para Desarrolladores

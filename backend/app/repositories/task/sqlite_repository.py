@@ -1,108 +1,101 @@
 # backend/app/repositories/task/sqlite_repository.py
 
 """
-Repositorio SQLite solo para Task
+Repositorio SQLite para Task usando SQLAlchemy.
 
-Ejecuta consultas a DB de forma propia
+Implementa la interfaz TaskRepository usando SQLAlchemy ORM
+en lugar de SQL crudo para mejor mantenibilidad.
+
+Referencias:
+- https://docs.sqlalchemy.org/en/20/orm/session_basics.html
 """
 
-"""
-*Refactor posible:
-- Crear un archivo db_connection con el crud genérico sqlite, 
-usando pandas como intermediario.
-- O usar alguna ORM como SQLAlchemy, o SQLModel.
-
-- Falta agregar logger para errores
-"""
-
-import sqlite3
 from typing import List, Optional
-from datetime import datetime
+from contextlib import contextmanager
+from sqlalchemy.orm import Session
 from app.models.task import Task
+from app.models.task_orm import TaskORM
 from app.repositories.task.base_repository import TaskRepository
+from app.database.base import Base, get_engine, get_session_factory
 from app.config.settings import settings
 
 
 class SqliteTaskRepository(TaskRepository):
-    """
-    Implementación que guarda las tareas en SQLite.
-    """
+    """Implementación que guarda las tareas en SQLite usando SQLAlchemy."""
+    
     def __init__(self, db_path: str = settings.task_db_absolute_path):
-        self.db_path = db_path
-        self._init_db()
+        # Crear URL de conexión SQLite
+        self.database_url = f"sqlite:///{db_path}"
+        
+        # Inicializar engine y sesiones
+        self.engine = get_engine(self.database_url)
+        Base.metadata.create_all(self.engine)
+        self.SessionLocal = get_session_factory(self.engine)
     
-    def _init_db(self):
-        """Crea la tabla de tareas si no existe"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS tasks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    completed BOOLEAN NOT NULL DEFAULT 0,
-                    created_at TIMESTAMP NOT NULL
-                )
-            ''')
-            conn.commit()
-    
-    def _get_connection(self):
-        """Retorna una conexión a la base de datos"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row  # Para acceder por nombre de columna
-        return conn
-    
-    def _row_to_task(self, row) -> Task:
-        """Convierte una fila de SQLite a objeto Task"""
-        task = Task(
-            title=row['title'],
-            description=row['description'],
-            id=row['id'],
-            completed=bool(row['completed']),
-            created_at=datetime.fromisoformat(row['created_at'])
-        )
-        return task
+    @contextmanager
+    def _get_session(self):
+        """Context manager para manejar sesiones automáticamente."""
+        session = self.SessionLocal()
+        try:
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
     
     def create(self, task: Task) -> Task:
-        with self._get_connection() as conn:
-            cursor = conn.execute(
-                '''INSERT INTO tasks (title, description, completed, created_at) 
-                   VALUES (?, ?, ?, ?)''',
-                (task.title, task.description, task.completed, task.created_at.isoformat())
-            )
-            # Manejar el caso donde lastrowid podría ser None
-            if cursor.lastrowid is not None:
-                task.id = cursor.lastrowid
-            conn.commit()
-        return task
+        with self._get_session() as session:
+            # Convertir Task a TaskORM
+            task_orm = TaskORM.from_domain_model(task)
+            
+            # Guardar en BD
+            session.add(task_orm)
+            session.flush()  # Para obtener el ID generado
+            
+            # Retornar con ID actualizado
+            return task_orm.to_domain_model()
     
     def get_all(self) -> List[Task]:
-        with self._get_connection() as conn:
-            cursor = conn.execute('SELECT * FROM tasks ORDER BY id')
-            return [self._row_to_task(row) for row in cursor.fetchall()]
+        with self._get_session() as session:
+            # Query todas las tareas
+            tasks_orm = session.query(TaskORM).order_by(TaskORM.id).all()
+            
+            # Convertir a modelo de dominio
+            return [task_orm.to_domain_model() for task_orm in tasks_orm]
     
     def get_by_id(self, task_id: int) -> Optional[Task]:
-        with self._get_connection() as conn:
-            cursor = conn.execute('SELECT * FROM tasks WHERE id = ?', (task_id,))
-            row = cursor.fetchone()
-            return self._row_to_task(row) if row else None
+        with self._get_session() as session:
+            # Buscar por ID
+            task_orm = session.query(TaskORM).filter(TaskORM.id == task_id).first()
+            
+            # Retornar None o Task convertida
+            return task_orm.to_domain_model() if task_orm else None
     
     def update(self, task_id: int, task: Task) -> Optional[Task]:
-        with self._get_connection() as conn:
-            cursor = conn.execute(
-                '''UPDATE tasks 
-                   SET title = ?, description = ?, completed = ?
-                   WHERE id = ?''',
-                (task.title, task.description, task.completed, task_id)
-            )
-            conn.commit()
+        with self._get_session() as session:
+            # Buscar tarea existente
+            task_orm = session.query(TaskORM).filter(TaskORM.id == task_id).first()
             
-            if cursor.rowcount > 0:
-                task.id = task_id
-                return task
-            return None
+            if not task_orm:
+                return None
+            
+            # Actualizar campos
+            task_orm.title = task.title
+            task_orm.description = task.description
+            task_orm.completed = task.completed
+            
+            # Retornar tarea actualizada
+            return task_orm.to_domain_model()
     
     def delete(self, task_id: int) -> bool:
-        with self._get_connection() as conn:
-            cursor = conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
-            conn.commit()
-            return cursor.rowcount > 0
+        with self._get_session() as session:
+            # Buscar y eliminar
+            task_orm = session.query(TaskORM).filter(TaskORM.id == task_id).first()
+            
+            if not task_orm:
+                return False
+            
+            session.delete(task_orm)
+            return True
