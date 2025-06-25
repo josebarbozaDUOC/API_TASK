@@ -18,7 +18,7 @@ Incluye:
 - 🧪 Middleware y manejo centralizado de errores
 - 🌱 Exploración inicial de **12factor** y **PEP8**
 
-Ideal para construir APIs reales, como base de nuevos proyectos o para tu portafolio técnico.
+Ideal para construir APIs reales, como base de nuevos proyectos o para portafolio técnico.
 
 
 ## Stack Tecnológico
