@@ -1,9 +1,25 @@
 # API_TASK — Gestión de tareas con FastAPI
-```
-API REST moderna para gestión de tareas, construida con FastAPI.
-Diseño modular, containerizada y lista para producción. 
-Con separación clara de responsabilidades y diseño extensible.
-```
+
+API REST modular para gestión de tareas, creada como proyecto personal de aprendizaje con enfoque profesional.
+
+Diseñada para practicar arquitectura limpia, principios SOLID y patrones desacoplados usando FastAPI, Docker y SQLAlchemy. El proyecto integra herramientas modernas de validación, logging, testing y configuración basada en `.env`.
+
+Su objetivo es convertirse en una plantilla técnica mantenible y extensible, apta para entornos reales y evolución hacia microservicios.
+
+Incluye:
+
+- 🧱 Principios **SOLID** y **Clean Code**
+- 🧪 Testing con **Pytest** (>90% cobertura)
+- 🐳 Containerización con **Docker** y Compose
+- 🧠 Validación con **Pydantic**
+- 📄 Logging estructurado con **Loguru**
+- 🗃️ Repositorios para **SQLite**, próximamente **PostgreSQL** y **MySQL**
+- 🔄 Evaluación de **SQLAlchemy** vs **SQLModel**
+- 🧪 Middleware y manejo centralizado de errores
+- 🌱 Exploración inicial de **12factor** y **PEP8**
+
+Ideal para construir APIs reales, como base de nuevos proyectos o para tu portafolio técnico.
+
 
 ## Stack Tecnológico
 - **Python 3.13** - Lenguaje base
@@ -199,10 +215,10 @@ uvicorn app.main:app --reload
 
 **Test suite completo con pytest:**
 
-✅ Tests unitarios (models, schemas, services)
-✅ Tests de repositorios (memory, SQLite)
-✅ Tests de integración (endpoints)
-✅ Cobertura >90%
+- ✅ Tests unitarios (models, schemas, services)
+- ✅ Tests de repositorios (memory, SQLite)
+- ✅ Tests de integración (endpoints)
+- ✅ Cobertura >90%
 
 **Ejecutar tests:**
 ```
