@@ -16,9 +16,12 @@ services:
       - .env
     environment:
       - POSTGRES_HOST=postgres  # Override para usar el nombre del servicio
+      - MYSQL_HOST=mysql
     depends_on:
       postgres:
         condition: service_healthy  # Espera hasta que PostgreSQL esté listo
+      mysql:
+        condition: service_healthy
     networks:
       - backend-db
     restart: unless-stopped  # Auto-reiniciar si falla
@@ -44,10 +47,36 @@ services:
       retries: 5
     networks:
       - backend-db
-    restart: unless-stopped  # Auto-reiniciar si falla
+    restart: unless-stopped
+
+  mysql:
+      image: mysql:8.0-debian
+      container_name: task-mysql
+      ports:
+        - "3307:3306" # Map de puerto en caso de estar ocupado
+      env_file:
+        - .env.example
+        - .env
+      environment:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      volumes:
+        - mysql_data:/var/lib/mysql
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+        interval: 2s
+        timeout: 5s
+        retries: 10
+        start_period: 30s
+      networks:
+        - backend-db
+      restart: unless-stopped
 
 volumes:
-  postgres_data:  # Docker crea y gestiona este volumen
+  postgres_data:
+  mysql_data:
 
 networks:
   backend-db:

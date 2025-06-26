@@ -8,6 +8,7 @@ from src.services.task_service import TaskService
 from src.repositories.task.memory_repository import MemoryTaskRepository
 from src.repositories.task.sqlite_repository import SqliteTaskRepository
 from src.repositories.task.postgresql_repository import PostgresqlTaskRepository
+from src.repositories.task.mysql_repository import MysqlTaskRepository
 from loguru import logger
 
 # Mapeo de repositorios
@@ -15,6 +16,7 @@ class RepoType(Enum):
     MEMORY      = MemoryTaskRepository
     SQLITE      = SqliteTaskRepository
     POSTGRES    = PostgresqlTaskRepository
+    MYSQL       = MysqlTaskRepository
 
 # Crear el repositorio basado en settings
 def create_task_service() -> TaskService:

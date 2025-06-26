@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     postgres_user: str = ""
     postgres_password: str = ""
 
+    # MySQL
+    mysql_host: str = ""
+    mysql_port: int = 3306 # 3306 default
+    mysql_local_port: int = 3307 # Para test
+    mysql_database: str = ""
+    mysql_user: str = ""
+    mysql_password: str = ""
+    mysql_root_password: str = ""  # Para Docker
+
     # Logging
     log_level: str = ""
     
@@ -87,6 +96,14 @@ class Settings(BaseSettings):
         return (
             f"postgresql+psycopg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
+    @property
+    def mysql_url(self) -> str:
+        """Construye la URL de conexión MySQL."""
+        return (
+            f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}"
+            f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
         )
 
     model_config = SettingsConfigDict(

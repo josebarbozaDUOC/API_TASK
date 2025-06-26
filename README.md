@@ -13,12 +13,12 @@ Incluye:
 - 🐳 Containerización con **Docker** y Compose
 - 🧠 Validación con **Pydantic**
 - 📄 Logging estructurado con **Loguru**
-- 🗃️ Repositorios para **SQLite**, **PostgreSQL** y próximamente **MySQL**
+- 🗃️ Repositorios para **SQLite**, **PostgreSQL** y **MySQL**
 - 🔄 Integración con **SQLAlchemy** ORM (evaluando **SQLModel**)
 - 🧪 Middleware y manejo centralizado de errores
 - 🌱 Exploración inicial de **12factor** y **PEP8**
 
-Ideal para construir APIs reales, como base de nuevos proyectos o para portafolio técnico.
+Ideal para construir APIs reales, como base de nuevos proyectos o para tu portafolio técnico.
 
 
 ## Stack Tecnológico
@@ -41,8 +41,8 @@ Ideal para construir APIs reales, como base de nuevos proyectos o para portafoli
 - Sprint 4 - SQLALCHEMY & RELACIONALES
   - ✅ STORY 15: Migración a SQLAlchemy ORM
   - ✅ STORY 16: PostgreSQL Repository + Docker Compose
-  - 🔄 STORY 17: MySQL Repository + Docker Compose
-  - STORY 18: Database Factory Pattern
+  - ✅ STORY 17: MySQL Repository + Docker Compose
+  - 🔄 STORY 18: Database Factory Pattern
   - STORY 19: Connection Pooling y Async
   - STORY 20: Revisión y Documentación
 
@@ -98,6 +98,7 @@ API_task/
 │   │   │       ├── memory_repository.py      # MemoryTaskRepository
 │   │   │       └── sqlite_repository.py      # SqliteTaskRepository
 │   │   │       └── postgresql_repository.py  # PostgresqlTaskRepository
+│   │   │       └── mysql_repository.py       # MysqlTaskRepository
 │   │   ├── routes/
 │   │   │   ├── health.py                 # Health check
 │   │   │   └── tasks.py                  # Endpoints de tareas
@@ -114,6 +115,7 @@ API_task/
 │   │   │   ├── test_memory_repository.py
 │   │   │   └── test_sqlite_repository.py
 │   │   │   └── test_postgresql_repository.py
+│   │   │   └── test_mysql_repository.py
 │   │   ├── conftest.py                   # Configuraciones de test
 │   │   ├── test_models.py                # Test de model Task
 │   │   ├── test_schemas.py               # Test de esquema Pydantic
@@ -172,6 +174,8 @@ API_task/
   - base_repository.py: `Interfaz que define contrato implementado por los demás repositorios.`
   - memory_repository.py: `Implementa TaskRepository en memoria (lista). Útil para desarrollo rápido y testing.`
   - sqlite_repository.py: `Implementa TaskRepository usando SQLite nativo. Persistencia local sin dependencias externas.`
+  - postgresql_repository.py: `Implementa TaskRepository para PostgreSQL.`
+  - mysql_repository.py: `Implementa TaskRepository para MySQL con reintentos.`
 - Responsabilidad: Proveer operaciones CRUD sin exponer detalles del almacenamiento.
 
 ### 5. Services (app/services/task_service.py)
@@ -279,7 +283,7 @@ uvicorn src.main:app --reload
 **Test suite completo con pytest:**
 
 - ✅ Tests unitarios (models, schemas, services)
-- ✅ Tests de repositorios (memory, SQLite, PostgreSQL)
+- ✅ Tests de repositorios (memory, SQLite)
 - ✅ Tests de integración (endpoints)
 - ✅ Cobertura >90%
 
@@ -357,3 +361,17 @@ curl http://localhost:8000/api/v1/tasks
 - Creado por el mismo autor de FastAPI, diseñado para integrarse perfectamente
 - Reduce código duplicado manteniendo type safety
 - **Próximo experimento**: Implementar con SQLModel en rama separada para comparar complejidad vs beneficios antes de decidir el approach final.
+
+**¿Por qué PostgreSQL con Docker y soporte multi-bases?**
+- PostgreSQL es una base robusta, open source y lista para producción, mientras que SQLite es ideal para desarrollo ágil.
+- Mantener soporte para múltiples motores permite usar SQLite en desarrollo, PostgreSQL en staging y producción, o incluso MySQL si se requiere.
+- El testing se adapta a cada nivel (memoria, SQLite, PostgreSQL) y permite migraciones sin tocar la lógica de negocio.
+- Se implementa un Factory pattern que selecciona el repositorio según .env, manteniendo un único código base.
+- Todo se despliega fácilmente con Docker Compose, garantizando entornos consistentes y sin instalaciones manuales.
+
+**¿Por qué reintentos de conexión en MySQL?**
+- Problema inicial: En Docker Compose, el backend iniciaba antes de que MySQL completara su inicialización, causando errores de conexión al intentar crear las tablas.
+- Opción 1: Usar `depends_on` con healthcheck → Requiere configuración adicional de healthcheck en docker-compose
+- Opción 2: Script de espera externo (wait-for-it) → Agrega dependencias externas
+- Opción 3: Reintentos en el código → Solución simple y autocontenida
+- **Decisión tomada**: Implementar reintentos con backoff en el repositorio MySQL. El backend intenta conectarse hasta 30 veces con 2 segundos entre intentos, suficiente para que MySQL complete su inicialización. Solución pragmática que no requiere cambios en Docker Compose ni scripts adicionales.
