@@ -32,29 +32,34 @@ pytestmark = pytest.mark.skipif(
 
 
 class TestMySQLTaskRepository:
+    
     @pytest.fixture(scope="class")
     def test_database_url(self):
         """Construye la URL de conexión para la base de datos de test."""
-        test_db = f"{settings.mysql_database}_test"
-        return (
-            f"mysql+pymysql://{settings.mysql_user}:{settings.mysql_password}"
-            f"@localhost:{settings.mysql_local_port}/{test_db}"
-        )
+        if settings.environment == "testing":
+            base_url = settings.mysql_url
+            test_db = f"{settings.mysql_database}_test"
+            return base_url.rsplit('/', 1)[0] + f"/{test_db}"
+        else:
+            test_db = f"{settings.mysql_database}_test"
+            return (
+                f"mysql+pymysql://{settings.mysql_user}:{settings.mysql_password}"
+                f"@localhost:{settings.mysql_local_port}/{test_db}"
+            )
 
     @pytest.fixture(scope="class")
     def setup_test_db(self, test_database_url):
         """Crea la base de datos de test antes de ejecutar las pruebas y la elimina al finalizar."""
-        # Para crear la DB necesitamos usar root
         db_name = test_database_url.split("/")[-1]
-        
-        # URL con usuario root para crear la base de datos
-        root_url = (
-            f"mysql+pymysql://root:{settings.mysql_root_password}"
-            f"@localhost:{settings.mysql_local_port}/mysql"
-        )
+        if settings.environment == "testing":
+            root_url = f"mysql+pymysql://root:{settings.mysql_root_password}@mysql:3306/mysql"
+        else:
+            root_url = (
+                f"mysql+pymysql://root:{settings.mysql_root_password}"
+                f"@localhost:{settings.mysql_local_port}/mysql"
+            )
         
         root_engine = create_engine(root_url)
-        # Intentar conectar con reintentos
         max_retries = 5
         for attempt in range(max_retries):
             try:

@@ -122,6 +122,7 @@ API_task/
 │   │   └── test_services.py              # Test de task_service
 │   │
 │   ├── Dockerfile                        # Imagen Docker de backend con healthcheck
+│   ├── Dockerfile.test                   # Imagen para ejecutar test en Docker
 │   ├── requirements.txt                  # Dependencias Python
 │   └── coverage.svg                      # % Cobertura de los tests
 │
@@ -138,6 +139,7 @@ API_task/
 ├── .env.example                          # Configuración por defecto
 ├── .gitignore
 ├── docker-compose.yml                    # Orquestador de servicios
+├── docker-compose.test.yml               # SOLO TEST
 └── README.md
 ```
 
@@ -283,17 +285,26 @@ uvicorn src.main:app --reload
 **Test suite completo con pytest:**
 
 - ✅ Tests unitarios (models, schemas, services)
-- ✅ Tests de repositorios (memory, SQLite)
+- ✅ Tests de repositorios (memory, SQLite, PostgreSQL, MySQL)
 - ✅ Tests de integración (endpoints)
 - ✅ Cobertura >90%
 
-**Ejecutar tests:**
+**Ejecutar tests localmente:**
 ```
 cd backend/
 python -m pytest tests/ -v                                    # Tests básicos
-python -m pytest tests/ --cov=app --cov-report=term-missing   # Con cobertura
-python -m coverage_badge -o coverage.svg                      # Generar badge
+python -m pytest tests/ --cov=src --cov-report=term-missing   # Con cobertura
+
+# Generar badge
+python -m pytest tests/ --cov=src --cov-report=term-missing --cov-report=xml -v
+python -m coverage_badge -o coverage.svg -f
 ```
+
+**Ejecutar tests en Docker:**
+```
+docker-compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit --build
+```
+- nota: revisar el `docker-compose.test.yml`
 
 ## Testing Manual
 
@@ -375,3 +386,11 @@ curl http://localhost:8000/api/v1/tasks
 - Opción 2: Script de espera externo (wait-for-it) → Agrega dependencias externas
 - Opción 3: Reintentos en el código → Solución simple y autocontenida
 - **Decisión tomada**: Implementar reintentos con backoff en el repositorio MySQL. El backend intenta conectarse hasta 30 veces con 2 segundos entre intentos, suficiente para que MySQL complete su inicialización. Solución pragmática que no requiere cambios en Docker Compose ni scripts adicionales.
+
+**¿Por qué lazy loading + multi-environment + testing containerizado?**
+- Problema: El servicio se conectaba a BD al importar, bloqueando tests con MySQL/PostgreSQL. Además, cambiar entre BDs requería modificar código.
+- **Solución integrada**:
+  - Lazy loading: `task_service = create_task_service` (sin paréntesis) + `@lru_cache()`. Conecta solo al usar, no al importar.
+  - Factory pattern: Selecciona repositorio según `ENVIRONMENT` y `TEST_REPOSITORY_TYPE` del .env
+  - Testing dual: Local con SQLite (rápido) o containerizado con `docker-compose.test.yml` (completo, múltiples BDs)
+- **Resultado**: Un código base que se adapta automáticamente a desarrollo (SQLite), testing (configurable), staging/producción (PostgreSQL/MySQL). Los tests corren sin bloqueos y cada desarrollador usa su BD preferida.

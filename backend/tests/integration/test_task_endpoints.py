@@ -28,7 +28,7 @@ from datetime import datetime
 from src.main import app
 from src.repositories.task.memory_repository import MemoryTaskRepository
 from src.services.task_service import TaskService
-from src.routes import tasks  # Importar el módulo para modificar task_service
+from src.routes import tasks
 
 class TestTaskEndpoints:
     """Tests de integración para endpoints de tareas."""
@@ -45,7 +45,7 @@ class TestTaskEndpoints:
         
         # Guardar el servicio original y reemplazar temporalmente
         self.original_service = tasks.task_service
-        tasks.task_service = test_service
+        tasks.task_service = lambda: test_service # Función que retorna la instancia del servicio
         
         yield  # Aquí se ejecuta el test
         

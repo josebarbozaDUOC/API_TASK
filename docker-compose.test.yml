@@ -1,0 +1,27 @@
+# docker-compose.test.yml
+# Docker Compose combina ambos archivos en un "compose final".
+# CORRER EL TEST: docker-compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit --build
+# DESPUES DEL TEST: docker-compose -f docker-compose.yml -f docker-compose.test.yml down -v
+
+services:
+  tests:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    container_name: api-task-tests
+    env_file:
+      - .env.example
+      - .env
+    environment:  # override sobre env_file
+      - ENVIRONMENT=testing
+      - POSTGRES_HOST=postgres
+      - MYSQL_HOST=mysql
+      - RUNNING_IN_DOCKER=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend-db
+    command: ["pytest", "tests/", "-v", "--disable-warnings"]

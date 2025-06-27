@@ -1,0 +1,26 @@
+# backend/Dockerfile.test
+
+FROM python:3.13-slim
+WORKDIR /app
+
+# Dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalación de dependencias
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código y tests
+COPY ./src ./src
+COPY ./tests ./tests
+
+# Configura PYTHONPATH para que pytest encuentre el módulo src
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Entrypoint para testeo
+CMD ["pytest", "tests/", "-v", "--disable-warnings"]

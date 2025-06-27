@@ -31,9 +31,12 @@ async def readiness_check():
     Returns:
         dict: Estado de preparación del servicio
     """
+    repository_type = settings.repository_type
+    if settings.environment.upper() == 'TESTING':
+        repository_type = settings.test_repository_type
     # Para más adelante verificar conexiones a DB, servicios externos, etc.
     return {
         "status": "ready",
         "message": "Service is ready to accept requests",
-        "repository": settings.repository_type
+        "repository": repository_type.upper()
     }
