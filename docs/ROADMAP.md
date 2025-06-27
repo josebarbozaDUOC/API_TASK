@@ -25,8 +25,8 @@ SPRINT 4: SQLALCHEMY & RELACIONALES 🔄 (EN CURSO)
 •	STORY 15: Migración a SQLAlchemy ORM ✅ (base.py + task_orm.py)
 •	STORY 16: PostgreSQL Repository + Docker Compose ✅
 •	STORY 17: MySQL Repository + Docker Compose ✅
-•	STORY 18: Database Factory Pattern 🔄
-•	STORY 19: Connection Pooling y Async
+•	STORY 18: Database Factory Pattern ✅
+•	STORY 19: Connection Pooling y Async 🔄
 •	STORY 20: Revisión y Documentación
 
 SPRINT 5: NoSQL & CACHE 📋
@@ -40,7 +40,7 @@ SPRINT 6: TESTING & CI/CD 📋
 •	STORY 26: Coverage y Quality Gates
 •	STORY 27: GitHub Actions CI/CD
 •	STORY 28: Pre-commit Hooks y Linting
-•	STORY 29: Tests Multi-Database
+•	STORY 29: Tests Multi-Database (Docker)
 •	STORY 30: Revisión y Documentación
 
 

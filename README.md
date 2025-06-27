@@ -42,8 +42,8 @@ Ideal para construir APIs reales, como base de nuevos proyectos o para tu portaf
   - ✅ STORY 15: Migración a SQLAlchemy ORM
   - ✅ STORY 16: PostgreSQL Repository + Docker Compose
   - ✅ STORY 17: MySQL Repository + Docker Compose
-  - 🔄 STORY 18: Database Factory Pattern
-  - STORY 19: Connection Pooling y Async
+  - ✅ STORY 18: Database Factory Pattern
+  - 🔄STORY 19: Connection Pooling y Async
   - STORY 20: Revisión y Documentación
 
 
@@ -94,6 +94,7 @@ API_task/
 │   │   │   └── task_orm.py               # Modelo ORM para Task
 │   │   ├── repositories/
 │   │   │   └── task/
+│   │   │       ├── repository_factory.py     # Factory pattern para repositorios
 │   │   │       ├── base_repository.py        # Interface TaskRepository
 │   │   │       ├── memory_repository.py      # MemoryTaskRepository
 │   │   │       └── sqlite_repository.py      # SqliteTaskRepository
@@ -112,6 +113,7 @@ API_task/
 │   │   │   ├── test_health_endpoints.py
 │   │   │   └── test_task_endpoints.py 
 │   │   ├── repositories/                 # Test de Repositorios
+│   │   │   ├── test_repository_factory.py
 │   │   │   ├── test_memory_repository.py
 │   │   │   └── test_sqlite_repository.py
 │   │   │   └── test_postgresql_repository.py
@@ -178,6 +180,7 @@ API_task/
   - sqlite_repository.py: `Implementa TaskRepository usando SQLite nativo. Persistencia local sin dependencias externas.`
   - postgresql_repository.py: `Implementa TaskRepository para PostgreSQL.`
   - mysql_repository.py: `Implementa TaskRepository para MySQL con reintentos.`
+  - repository_factory.py: `Factory que crea el repositorio correcto según configuración.`
 - Responsabilidad: Proveer operaciones CRUD sin exponer detalles del almacenamiento.
 
 ### 5. Services (app/services/task_service.py)
@@ -256,7 +259,7 @@ uvicorn src.main:app --reload
 
 **Modificar storage (repositorios):**
 - Agregar nuevos en `repositories/`
-- Registrar en `config/dependencies.py`
+- Registrar en `repository_factory.py`
 - Cambiar `REPOSITORY_TYPE` en `.env.example`
 
 **Cambiar validaciones:**
@@ -394,3 +397,10 @@ curl http://localhost:8000/api/v1/tasks
   - Factory pattern: Selecciona repositorio según `ENVIRONMENT` y `TEST_REPOSITORY_TYPE` del .env
   - Testing dual: Local con SQLite (rápido) o containerizado con `docker-compose.test.yml` (completo, múltiples BDs)
 - **Resultado**: Un código base que se adapta automáticamente a desarrollo (SQLite), testing (configurable), staging/producción (PostgreSQL/MySQL). Los tests corren sin bloqueos y cada desarrollador usa su BD preferida.
+
+**¿Por qué un Factory Pattern explícito para repositorios?**
+- Problema inicial: La lógica de creación de repositorios estaba mezclada con la inyección de dependencias en `dependencies.py`, violando el principio de responsabilidad única.
+- Opción 1: Enum con mapeo (implementación original) → Funcional pero mezclaba responsabilidades
+- Opción 2: Factory con diccionario → Simple, explícito y fácil de extender
+- Opción 3: Auto-descubrimiento → Más "mágico" pero viola "explicit is better than implicit" de Python
+- **Decisión tomada**: Factory dedicado (`repository_factory.py`) con diccionario de tipos. Centraliza la creación, soporta alias (postgres/postgresql), facilita testing con mocks, y mantiene `dependencies.py` enfocado solo en inyección. Patrón clásico que cualquier desarrollador reconoce inmediatamente.
